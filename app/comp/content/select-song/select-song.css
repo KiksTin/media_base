@@ -1,0 +1,67 @@
+.music-container{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    padding: 10px 30px;
+
+    height: fit-content;
+    cursor: pointer;
+
+   .image{
+        width: fit-content;
+        background-color: #962b2b;
+        border-radius: 10px;
+    } 
+    img{
+        height: 70px;
+        width: 70px;
+        border-radius: 10px;
+    }
+
+    p{
+        font-size: medium;
+    }
+
+    &:hover{
+        transition: all 0.4s ease-in-out;
+        background-color: var(--background-2);
+    }
+
+    .song-artist{
+        flex: 1;
+        flex-direction: column;
+        justify-content: left;
+        align-items: center;
+        margin: 12px;
+        overflow: hidden;
+
+        h3{
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary-text);
+        }
+        p{
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: var(--secondary-text);
+        }
+    }
+    
+    .song-detail{
+        display: flex;
+        align-items: center;
+        justify-content: right;
+        width: fit-content;
+        gap: 12px;
+
+        .save-button, .download-button{
+            height: 35px;
+            width: 35px;
+            border: none;
+            cursor: pointer;
+            fill: var(--primary-text);
+        }
+    }
+}
+

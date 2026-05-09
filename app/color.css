@@ -1,0 +1,26 @@
+:root {
+  --background: #e9e9e9;
+  --background-2: #d3d3d3;
+  --border: #545454;
+  --foreground: #323232;
+  --shadow: #323232;
+
+  --songs-n-player-bg: #e9e9e9d8;
+
+  --primary-text: #1e1e1e;
+  --secondary-text: #5d5d5d;
+  --accent: #e9153c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #151515;
+    --background-2: #2a2a2a;
+    --foreground: #9d9d9d;
+    --shadow: #0c0c0c;
+    --primary-text: #ededed;
+    --secondary-text: #a0a0a0;
+    
+    --songs-n-player-bg: #171717;
+  }
+}

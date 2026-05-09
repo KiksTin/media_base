@@ -1,0 +1,36 @@
+
+.playlist-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 15px;
+    padding: 25px;
+    flex: 1;
+     height: calc(100dvh - 70px);
+    
+}
+
+.playlist-cards{
+        display: inline-block;
+        flex-direction: row;
+        align-self: center;
+
+        height: 250px;
+        width: 62dvw;
+        margin: 12px 0;
+
+        overflow-x: scroll;
+        overflow-y: hidden;
+        white-space: nowrap;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+@media (max-width: 600px) {
+
+    .playlist-cards{
+        top: 40px;
+        height: 200px;
+        width: 85dvw;
+    }
+}

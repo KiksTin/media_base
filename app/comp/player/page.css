@@ -1,0 +1,225 @@
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.player{
+    display:flex;
+    padding: 20px;
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.562);
+    background-color: var(--songs-n-player-bg);
+    border-radius: 12px;
+    align-content: center;
+    justify-content: space-around;
+    
+    flex-direction: column;
+    height: 84dvh;
+    width: fit-content;
+
+    overflow: none;
+
+    .disc{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        width: 350px;
+        height: 350px;
+        border-radius: 50%;
+        background-color: rgb(0, 0, 0);
+        overflow: none;
+
+        .disc-img{
+            object-fit: cover;
+            position: absolute;
+            width: 75%;
+            height: 75%;
+            border-radius: 50%;
+        } 
+    }
+
+    .rotate {
+        animation: rotate 10s linear infinite;
+    }
+
+    .song-info{
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+
+        border-radius: 20px;
+        padding: 20px;
+
+
+        .song-name{
+            justify-content: left;
+            width: 100%;
+
+            .song-name-text{
+                font-size: medium;
+                font-weight: bold;
+                color: var(--primary-text);
+            }
+
+            .song-artist-text{
+             font-size: medium;
+             color: var(--secondary-text);
+            }
+        }
+    
+    .song-stat-container{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+    }
+    .audio-range-container{
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        align-items: center;
+        width: 100%;
+    }
+
+    .audio-range{
+       flex: 1;
+       height: 5px;
+    }
+
+    .custom-controls{
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+    }
+    .custom-play-btn{
+        position: relative;
+        align-items: center;
+        justify-content: center;   
+        background-color: #4CAF50; 
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+    }
+    .play-btn,
+    .pause-btn{
+        display: flex;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    } 
+    .hidden {
+        display: none;
+    }
+}   
+}
+
+
+@media (max-width: 600px) {   
+   .player{
+    display:flex;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    align-content: center;
+    justify-content: space-around;
+    position: relative;
+
+    height: 80px;
+    width: 95%;
+    position: fixed;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background-color: #1e1e1e;
+
+    .disc{
+        visibility: hidden;
+    }
+
+  }
+
+    .song-info{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+
+        border-radius: 20px;
+
+        .song-stat-container{
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+        }
+        span{
+            visibility: hidden;
+        }
+
+        .song-name{
+            justify-content: left;
+            width: 20%;
+            margin: 0;
+
+            p{
+             font-size: small;
+            }
+        }
+
+        .song-status{
+            margin: 0;
+            padding: 0;
+            input{
+                width: 110%;
+                margin: 0;
+                padding: 0;
+                height: 5px;
+            }
+        }
+
+        .song-controls{
+            margin: 0;
+        }
+
+        button{
+            background-color: none;
+            border: none;
+            cursor: pointer;
+            margin: 0;
+            padding: 0;
+        }
+
+        .control-icon{
+            width: 30px;
+            height: 30px;
+        }
+
+        
+    }
+}
+

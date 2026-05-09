@@ -1,26 +1,163 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+
+  font-family: "Handjet", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-variation-settings:
+    "ELGR" 1,
+    "ELSH" 2;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.whole{
+    height: 100%;
+    width: 100%;
+    position: relative;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+.main_layout {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  flex-direction: row;
+  overflow: none;
+}
+.content{
+  position: absolute;
+  left: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  margin: 0;
+  padding: 0;;
+  flex-direction: row;
+  overflow: none;
+  width: 93%;
+
+  main{
+    flex: 1;
+    height: fit-content;
+    margin: 0;
+    padding: 0;
   }
 }
 
-body {
+.container{
+  display: flex;
+  flex-direction: column;
+  height: 84dvh;
+  flex: 1;
+  margin: 0;
+
+  box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.562);
+  background-color: var(--songs-n-player-bg);
+  border-radius: 12px;
+
+  .header{
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    padding: 10px;
+    border-radius: 12px 12px 0 0;
+    font-size: 2.3rem;
+    font-weight: bold;
+    color: var(--primary-text);
+    background-color: var(--songs-n-player-bg);
+    border-bottom: 1px solid var(--border);
+       
+    }
+
+    .select-song{
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+
+        overflow-x: hidden;
+        overflow-y: auto;
+        white-space: nowrap;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+  }
+
+@media screen and (min-width: 600px) and (max-width:120vh) {
+  .content {
+    position: relative;
+    flex-direction: column;
+    gap: 0;
+    height: 90vh;
+    width: 80vw;
+    left: 0 !important;
+  }
+  .container {
+    position: absolute;
+    top: 2dvh;
+    height: 65dvh;
+    width: 80vw;
+  }
+  .player {
+    position: absolute;
+    bottom: 2dvh;
+    height: 20dvh !important;
+    width: 80vw !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    
+    .disc{
+      width: 120px !important;
+      height: 120px !important;
+    }
+    
+    .song-info{
+      flex: 1 !important;
+    }
+  }
+}
+
+
+@media (max-width: 600px) {
+  .main_layout {
+  display: flex;
+  flex-direction: column;
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  }
+   .content{
+    position: relative;
+    width: 100dvw!important;
+    height: 75dvh !important;
+    align-items: center;
+    justify-content: center;
+    padding: 2dvh;
+    top: 70px !important;
+    left: 0 !important;
+   }
+  .container{
+    position: absolute;
+    height: 75dvh !important;
+    margin: 2dvh !important;
+    width: 95vw !important;
+    border: none;
+    background-color: transparent;
+    box-shadow: none;
+    
+    .header{
+      font-size: 2rem;
+      padding: 5px;
+      bottom: 0;
+      background-color: var(--background);
+    }
+  }
 }

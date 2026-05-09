@@ -1,0 +1,11 @@
+.download-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    padding: 25px;
+    gap: 15px;
+    flex: 1;
+    height: calc(100dvh - 70px);
+
+}
+    
