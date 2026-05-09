@@ -1,6 +1,7 @@
 'use client'
 import "./page.css";
 import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import DOMPurify from 'dompurify';
 import { useSongContext } from '../../context/SongContext';
 import { useClientContext } from '../../context/ClientContext';
@@ -10,6 +11,7 @@ const Player = ({}) => {
   const { currentSong, isPlaying, setIsPlaying } = useSongContext();
   const audioRef = useRef<HTMLAudioElement>(null);
   const { currentUser } = useClientContext();
+  const pathname = usePathname();
 
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
@@ -109,8 +111,15 @@ const Player = ({}) => {
     }
   }, [currentSong]);
 
+  if(pathname === '/profile' || pathname === '/about') {
+     const container = document.getElementById('player');
+     if(container) {
+       container.style.display = 'none';
+     }
+  }
+
   return (
-    <div className='player'>
+    <div className='player' id='player'>
       <div className='disc' id='disc'>
         <img className='disc-img' id='disc-img' alt='Disc' src={currentSong?.song_image || "./logo.png"} />
       </div>

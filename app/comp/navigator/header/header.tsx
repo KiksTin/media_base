@@ -43,8 +43,6 @@ export default function Header({currentUser}: {currentUser: any}) {
             
         </div>
       </div>
-
-      
         
     </header>
   )
