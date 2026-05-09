@@ -8,9 +8,6 @@ import "../globals.css";
 import "../color.css";
 import "../size.css";
 
-// Client component to handle session storage
-
-
 
 export default function MainLayout({
   children,
