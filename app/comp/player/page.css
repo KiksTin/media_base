@@ -11,7 +11,7 @@
 .player{
     display:flex;
     padding: 20px;
-    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.562);
+    box-shadow: 0px 3px 8px var(--shadow);
     background-color: var(--songs-n-player-bg);
     border-radius: 12px;
     align-content: center;
@@ -107,24 +107,53 @@
         position: relative;
         align-items: center;
         justify-content: center;   
-        background-color: #4CAF50; 
-        width: 50px;
-        height: 50px;
+        width: 65px;
+        height: 65px;
         border-radius: 50%;
+
+        &:hover{
+            background-color: var(--accent);
+        }
     }
-    .play-btn,
-    .pause-btn{
+    .custom-controls-left, .custom-controls-right{
         display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+
+        svg {
+            width: 30px;
+            height: 30px;
+            fill: var(--primary-text);
+        }
+    }
+    .pause-btn{
         position: absolute;
+        border: none;
+        cursor: pointer;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        color: white;
+
+        svg {
+            width: 40px;
+            height: 40px;
+            fill: var(--primary-text);
+        }
+    } 
+    .play-btn{
+        position: absolute;
         border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
         cursor: pointer;
-        font-size: 16px;
+        top: 50%;
+        left: 57%;
+        transform: translate(-50%, -50%);
+
+        svg {
+            width: 40px;
+            height: 40px;
+            fill: var(--primary-text);
+        }
     } 
     .hidden {
         display: none;

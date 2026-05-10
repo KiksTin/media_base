@@ -31,7 +31,7 @@ const LoginForm = ({response}: {response: any}) => {
             user_profile: loggedInUser.user_profile
         }));
         console.log('Login successful, redirecting...');
-        window.location.href = "/";
+        window.location.href = "/profile";
 
          } else {
         attempt--;

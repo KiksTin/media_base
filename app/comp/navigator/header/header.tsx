@@ -1,10 +1,8 @@
 
 import './header.css'
 import Link from 'next/link'
-import { useClientContext } from '../../../context/ClientContext'
 
 export default function Header({currentUser}: {currentUser: any}) {
-  const { logout } = useClientContext();
   
   return (
     <header>
@@ -27,18 +25,7 @@ export default function Header({currentUser}: {currentUser: any}) {
           </Link>
             |
           <div className='user-log-container'>
-            {currentUser ? (
-              <>
-                <Link href="/profile"><img className='user-icon-longged-in' src={currentUser.user_profile || "/user.png"} alt="User"/></Link>
-                <button type="button"onClick={logout}>Logout</button>
-              </>
-            ) : (
-              <>
-                <img className='user-icon' src="/user.png" alt="User"/>
-                <Link href="/log-in" className='li'>Log In</Link>
-                <Link href="/sign-up" className='su'>Sign Up</Link>
-              </>
-            )}
+                <Link href="/profile"><img className='user-icon-longged-in' src={currentUser?.user_profile || "/user.png"} alt="User"/></Link>
           </div>
             
         </div>

@@ -7,6 +7,7 @@
 
 .profile-wrapper {
     display: flex;
+    flex-direction: column;
     gap: 20px;
     width: 100%;
     height: 100%;
@@ -50,4 +51,24 @@
 .user-email {
     font-size: 1rem;
     color: #666;
+}
+
+.profile-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+.auth-link {
+    padding: 10px 20px;
+    border: 1px solid var(--primary-text);
+    border-radius: 5px;
+    text-decoration: none;
+    color: var(--primary-text);
+    transition: all 0.3s ease;
+}
+.auth-link:hover {
+    background-color: var(--primary-color);
+    color: #fff;
 }
