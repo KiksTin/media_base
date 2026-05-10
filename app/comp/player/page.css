@@ -31,14 +31,15 @@
         width: 350px;
         height: 350px;
         border-radius: 50%;
-        background-color: rgb(0, 0, 0);
         overflow: none;
+        background-size: cover;
+        background-position: center;
 
         .disc-img{
             object-fit: cover;
             position: absolute;
-            width: 75%;
-            height: 75%;
+            width: 35%;
+            height: 35%;
             border-radius: 50%;
         } 
     }

@@ -56,7 +56,11 @@ const HomeContent = ({currentUser}: {currentUser: any}) => {
   <div className='home-container'>
    <div className="container">
     <div className='header'>
+      {currentUser ? (
         <h1>Recently Played</h1>
+      ) : (
+        <h1>Explore Music</h1>
+      )}
     </div>
     <div className='select-song'>
       {loading ? (

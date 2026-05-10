@@ -60,11 +60,8 @@ export async function GET(request: Request) {
             s.song_image,
             s.song_audio,
             s.song_artist,
-            s.song_genre,
-            r.date_played
-          FROM mb_recent r
-          LEFT JOIN mb_song_tbl s ON r.song_id = s.song_id
-          ORDER BY r.date_played DESC
+            s.song_genre
+          FROM mb_song_tbl s
         `;
       }
       

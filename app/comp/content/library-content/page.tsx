@@ -59,10 +59,18 @@ const LibraryContent = ({currentUser}: {currentUser: any}) => {
     <div className='library-container'>
     <div className="container">
     <div className='header'>
-        <h1>Song Library</h1>
+        <h1>Liked Songs</h1>
     </div>
     <div className='select-song'>
-      <SelectSong likedSongs={likedSongs} recentlyPlayed={[]} selectedPlaylist={null} currentUser={currentUser}/>
+      {currentUser ? (
+        loading ? (
+          <p>Loading...</p>
+        ) : (
+          <SelectSong likedSongs={likedSongs} recentlyPlayed={[]} selectedPlaylist={null} currentUser={currentUser}/>
+        )
+      ) : (
+        <p>Please log in to view your liked songs</p>
+      )}
     </div>
   </div>
   </div>

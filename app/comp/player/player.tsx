@@ -49,7 +49,6 @@ const Player = ({}) => {
     const playpauseBtn = document.querySelector('.custom-play-btn');
 
     const disc = document.getElementById('disc');
-    const discImg = document.getElementById('disc-img');
 
     const playBtn = document.getElementById('play-btn');
     const pauseBtn = document.getElementById('pause-btn');
@@ -78,18 +77,16 @@ const Player = ({}) => {
 
           if (playBtn) playBtn.classList.add('hidden');
           if (pauseBtn) pauseBtn.classList.remove('hidden');
-          if (disc && discImg) {
+          if (disc) {
             disc.classList.add('rotate');
-            discImg.classList.add('rotate');
           }
         } else {
           audio.pause();
           setIsPlaying(false);
           if (playBtn) playBtn.classList.remove('hidden');
           if (pauseBtn) pauseBtn.classList.add('hidden');
-          if (disc && discImg) {
+          if (disc) {
             disc.classList.remove('rotate');
-            discImg.classList.remove('rotate');
           }
         }
       }
@@ -111,16 +108,21 @@ const Player = ({}) => {
     }
   }, [currentSong]);
 
+  const container = document.getElementById('player');
   if(pathname === '/profile' || pathname === '/about') {
-     const container = document.getElementById('player');
      if(container) {
        container.style.display = 'none';
      }
+  } else {
+    if(container) {
+      container.style.display = 'flex';
+    }
   }
 
   return (
     <div className='player' id='player'>
       <div className='disc' id='disc'>
+        <img className='disc' id='disc-img' alt='Disc' src="./disc.png" />
         <img className='disc-img' id='disc-img' alt='Disc' src={currentSong?.song_image || "./logo.png"} />
       </div>
       <br />
