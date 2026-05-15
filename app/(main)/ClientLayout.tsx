@@ -14,7 +14,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
   const [currentUser, setCurrentUserState] = useState<any>(null);
 
   useEffect(() => {
-    // Check for logged-in user in sessionStorage
+    
     const storedUser = sessionStorage.getItem('currentUser');
     if (storedUser) {
       try {
@@ -23,7 +23,6 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
         setCurrentUser(user);
         setIsLogedIn(true);
       } catch (error) {
-        console.error('Error parsing stored user:', error);
         sessionStorage.removeItem('currentUser');
       }
     }

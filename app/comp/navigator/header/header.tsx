@@ -1,9 +1,71 @@
 
 import './header.css'
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { useSongContext } from '../../../context/SongContext'
 
 export default function Header({currentUser}: {currentUser: any}) {
+  const { setCurrentSong, setIsPlaying } = useSongContext();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    
+    if (query.trim().length < 2) {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await fetch(`/api/search-songs?q=${encodeURIComponent(query.trim())}`);
+      if (response.ok) {
+        const data = await response.json();
+        setSearchResults(data);
+        setShowResults(true);
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSongSelect = (song: any) => {
+    setCurrentSong(song);
+    setIsPlaying(true);
+    setShowResults(false);
+    setSearchQuery('');
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    handleSearch(value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setShowResults(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.search-container')) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <header>
       <div className="header_container">
@@ -11,7 +73,46 @@ export default function Header({currentUser}: {currentUser: any}) {
           <Link href="/"><img src="/logo.png" alt="Logo" /></Link>
           <h1>Media Base</h1>
           </div>
-        <div className='search'><input type="search" placeholder="Search" /></div>
+        <div className='search-container'>
+          <div className='search-input-wrapper'>
+            <input 
+              type="search" 
+              placeholder="Search songs, artists..." 
+              value={searchQuery}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              onFocus={() => searchQuery.trim().length >= 2 && setShowResults(true)}
+              className="search-input"
+            />
+            {isSearching && <div className="search-spinner">⏳</div>}
+          </div>
+          
+          {showResults && (
+            <div className="search-results">
+              {searchResults.length > 0 ? (
+                searchResults.map((song: any) => (
+                  <div 
+                    key={song.song_id} 
+                    className="search-result-item"
+                    onClick={() => handleSongSelect(song)}
+                  >
+                    <img 
+                      src={song.song_image} 
+                      alt={song.song_name} 
+                      className="search-result-image"
+                    />
+                    <div className="search-result-info">
+                      <div className="search-result-title">{song.song_name}</div>
+                      <div className="search-result-artist">{song.song_artist}</div>
+                    </div>
+                  </div>
+                ))
+              ) : searchQuery.trim().length >= 2 ? (
+                <div className="search-no-results">No songs found</div>
+              ) : null}
+            </div>
+          )}
+        </div>
         <div className='links'>
           <Link href="/about">
            <svg className='h-icon' viewBox="-2 -2 24 24" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin" >

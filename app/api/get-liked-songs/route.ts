@@ -8,7 +8,6 @@ export async function GET(request: Request) {
     
     console.log('Fetching recently played songs for user:', userId);
     
-    // Test table structure first
     try {
       const tableTest = await sql`
         SELECT column_name, data_type 

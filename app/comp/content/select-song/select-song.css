@@ -55,12 +55,21 @@
         width: fit-content;
         gap: 12px;
 
-        .save-button, .download-button{
+        .like-button, .download-button{
             height: 35px;
             width: 35px;
             border: none;
             cursor: pointer;
             fill: var(--primary-text);
+            transition: all 0.2s ease-in-out;
+            z-index: 10;
+
+            &:hover{
+                scale: 1.1;
+            }
+            &:active{
+                scale: 0.9;
+            }
         }
     }
 }

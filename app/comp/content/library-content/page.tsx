@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import './page.css'
 import SelectSong from '../select-song/select-song';
+import Link from 'next/link'
 
 
 interface LikedItem {
@@ -17,10 +18,7 @@ const LibraryContent = ({currentUser}: {currentUser: any}) => {
 
    useEffect(() => {
       const fetchLikedSongs = async () => {
-        try {
-          console.log('LikeContent - Current user:', currentUser);
-          console.log('LikeContent - User ID:', currentUser?.user_id);
-          
+        try {  
           if (!currentUser || !currentUser.user_id) {
             console.log('LikeContent - No current user or user_id, skipping fetch');
             return;
@@ -30,27 +28,17 @@ const LibraryContent = ({currentUser}: {currentUser: any}) => {
           console.log('LikeContent - Fetching liked songs from:', apiUrl);
           
           const response = await fetch(apiUrl);
-          console.log('LikeContent - Response status:', response.status);
-          console.log('LikeContent - Response headers:', response.headers);
           
           if (response.ok) {
             const data = await response.json();
-            console.log('LikeContent - Liked songs data:', data);
-            console.log('LikeContent - Data type:', typeof data);
-            console.log('LikeContent - Data length:', data?.length);
-            console.log('LikeContent - Sample item:', data?.[0]);
             setLikedSongs(data);
-          } else {
-            console.error('LikeContent - Failed to fetch recently played:', response.status);
-            console.error('LikeContent - Response text:', await response.text());
-          }
+          } 
         } catch (error) {
           console.error('LikeContent - Error fetching recently played:', error);
         } finally {
           setLoading(false);
         }
       };
-  
       fetchLikedSongs();
     }, [currentUser]);
 
@@ -69,7 +57,16 @@ const LibraryContent = ({currentUser}: {currentUser: any}) => {
           <SelectSong likedSongs={likedSongs} recentlyPlayed={[]} selectedPlaylist={null} currentUser={currentUser}/>
         )
       ) : (
+        <>
+         <div className='no-user-container'>
         <p>Please log in to view your liked songs</p>
+         <div className="auth-links">
+            <Link href="/log-in" className="auth-link">Login</Link>
+            |
+            <Link href="/sign-up" className="auth-link">Sign Up</Link>
+         </div>
+         </div>
+        </>
       )}
     </div>
   </div>

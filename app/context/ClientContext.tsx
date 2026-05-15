@@ -6,6 +6,8 @@ interface User {
   user_name: string;
   user_email: string;
   user_password: string;
+  user_cover: string;
+  user_profile: string;
 }
 
 interface ClientContextType {
@@ -30,7 +32,6 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLogedIn, setIsLogedIn] = useState(false);
 
-  // Read currentUser from sessionStorage on component mount
   useEffect(() => {
     const storedUser = sessionStorage.getItem('currentUser');
     if (storedUser) {
@@ -38,6 +39,7 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         const user = JSON.parse(storedUser);
         setCurrentUser(user);
         setIsLogedIn(true);
+         console.log('ClientContext - user cover:', user.user_cover);
         console.log('ClientContext - User loaded from sessionStorage:', user);
       } catch (error) {
         console.error('ClientContext - Error parsing stored user:', error);

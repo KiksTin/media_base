@@ -28,7 +28,8 @@ const LoginForm = ({response}: {response: any}) => {
             user_id: loggedInUser.user_id,
             user_name: loggedInUser.user_name,
             user_email: loggedInUser.user_email,
-            user_profile: loggedInUser.user_profile
+            user_profile: loggedInUser.user_profile,
+            user_cover: loggedInUser.user_cover
         }));
         console.log('Login successful, redirecting...');
         window.location.href = "/profile";

@@ -3,6 +3,7 @@ import './page.css'
 import SelectSong from '../select-song/select-song'
 import PlaylistContainer from '../playlist-content/playlist-container/page'
 import { useState } from 'react'
+import Link from 'next/link'
 
 const PlaylistContent = ({currentUser}: {currentUser: any}) => {
   const [selectedPlaylist, setSelectedPlaylist] = useState<any | null>(null);
@@ -37,7 +38,14 @@ const PlaylistContent = ({currentUser}: {currentUser: any}) => {
       </>
           ):(
       <>
+      <div className='no-user-container'>
       <h3 className='select-song-error'>Log-in to create your playlist</h3>
+      <div className="auth-links">
+      <Link href="/log-in" className="auth-link">Login</Link>
+      |
+      <Link href="/sign-up" className="auth-link">Sign Up</Link>
+      </div>
+      </div>
       </>
     )
 }

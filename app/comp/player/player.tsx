@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import DOMPurify from 'dompurify';
 import { useSongContext } from '../../context/SongContext';
 import { useClientContext } from '../../context/ClientContext';
+import DownloadManager from '../../utils/downloadManager';
 
 const Player = ({}) => {
   
@@ -22,6 +23,14 @@ const Player = ({}) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [lastPlayedSong, setLastPlayedSong] = useState<number | null>(null);
+  const [likedSong, setLikedSong] = useState<number | null>(null);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloaded, setIsDownloaded] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [userPlaylists, setUserPlaylists] = useState<any[]>([]);
+  const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
+  const [isAddingToPlaylist, setIsAddingToPlaylist] = useState(false);
 
   useEffect(() => {
     if (currentSong?.song_id && currentSong.song_id && currentUser?.user_id && currentUser.user_id !== lastPlayedSong) {
@@ -40,6 +49,119 @@ const Player = ({}) => {
     
     }
   }, [currentSong, lastPlayedSong]);
+
+  const handleDownload = async () => {
+    if (!currentSong?.song_id || !currentUser?.user_id || isDownloading) {
+      return;
+    }
+
+    setIsDownloading(true);
+    setShowMenu(false);
+    
+    try {
+      const downloadedSong = await DownloadManager.downloadSong(currentSong.song_id, currentUser.user_id);
+      if (downloadedSong) {
+        setIsDownloaded(true);
+      }
+    } catch (error) {
+      console.error('Download failed:', error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleLikedSong = () => {
+    if (!currentSong?.song_id || !currentUser?.user_id) return;
+    
+    const endpoint = isLiked ? '/api/remove-liked-songs' : '/api/add-liked-songs';
+    
+    fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        song_id: currentSong.song_id,
+        user_id: currentUser.user_id
+      })
+    }).then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          setIsLiked(!isLiked);
+          if (!isLiked) {
+            setLikedSong(currentSong.song_id);
+          } else {
+            setLikedSong(null);
+          }
+        }
+      })
+      .catch(error => console.error('Failed to toggle liked song:', error));
+    
+    setShowMenu(false);
+  };
+
+  const fetchUserPlaylists = async () => {
+    if (!currentUser?.user_id) return;
+    
+    try {
+      const response = await fetch(`/api/get-user-playlists?user_id=${currentUser.user_id}`);
+      if (response.ok) {
+        const playlists = await response.json();
+        setUserPlaylists(playlists);
+      }
+    } catch (error) {
+      console.error('Error fetching playlists:', error);
+    }
+  };
+
+  const handleAddToPlaylist = async (playlistId: number) => {
+    if (!currentSong?.song_id || !currentUser?.user_id || isAddingToPlaylist) {
+      return;
+    }
+    
+    setIsAddingToPlaylist(true);
+    
+    try {
+      const response = await fetch('/api/add-song-to-playlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          song_id: currentSong.song_id,
+          playlist_id: playlistId,
+          user_id: currentUser.user_id
+        })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        console.log('Song added to playlist successfully');
+      } else {
+        console.error('Failed to add song to playlist:', data.error);
+      }
+    } catch (error) {
+      console.error('Error adding song to playlist:', error);
+    } finally {
+      setIsAddingToPlaylist(false);
+      setShowPlaylistMenu(false);
+      setShowMenu(false);
+    }
+  };
+
+  const handleMenuClick = () => {
+    if (showMenu) {
+      setShowMenu(false);
+      setShowPlaylistMenu(false);
+    } else {
+      setShowMenu(true);
+      fetchUserPlaylists();
+    }
+  };
+
+  const handlePlaylistMenuClick = () => {
+    setShowPlaylistMenu(!showPlaylistMenu);
+  };
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -99,7 +221,7 @@ const Player = ({}) => {
       if (playpauseBtn) playpauseBtn.removeEventListener('click', handlePlayPause);
     };
 
-  }, []);
+  }, [currentSong, currentUser]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -108,18 +230,63 @@ const Player = ({}) => {
     }
   }, [currentSong]);
 
-   const container = document.getElementById('player') as HTMLInputElement;
-  if(pathname === '/profile' || pathname === '/about') {
-    if(container) {
-      container.style.display = 'none';
-    }
-  } else {
-    if(container) {
-      container.style.display = 'flex';
-    }
-  }
-  
+  useEffect(() => {
+    const checkIfLiked = async () => {
+      if (currentSong?.song_id && currentUser?.user_id) {
+        try {
+          const response = await fetch(`/api/get-liked-songs?user_id=${currentUser.user_id}`, {
+            method: 'GET'
+          });
+          
+          const data = await response.json();
+          const isSongLiked = data?.some((song: any) => song.song_id === currentSong.song_id);
+          setIsLiked(isSongLiked);
+        } catch (error) {
+          console.error('Failed to check liked status:', error);
+        }
+      }
+    };
 
+    const checkIfDownloaded = () => {
+      if (currentSong?.song_id) {
+        const downloaded = DownloadManager.isSongDownloaded(currentSong.song_id);
+        setIsDownloaded(downloaded);
+      }
+    };
+
+    checkIfLiked();
+    checkIfDownloaded();
+  }, [currentSong, currentUser]);
+
+  useEffect(() => {
+    const container = document.getElementById('player');
+    if(pathname === '/profile' || pathname === '/about') {
+   
+      if(container) {
+        (container as HTMLInputElement).style.display = 'none';
+      }
+    } else {
+  
+      if(container) {
+        (container as HTMLInputElement).style.display = 'flex';
+      }
+    }
+  }, [pathname]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (showMenu && !target.closest('.menu-container')) {
+        setShowMenu(false);
+        setShowPlaylistMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
 
   return (
     <div className='player' id='player'>
@@ -149,6 +316,85 @@ const Player = ({}) => {
             id="main-audio"
           />
           <div className="custom-controls">
+            <div className="menu-container">
+              <button 
+                className="menu-button" 
+                onClick={handleMenuClick}
+                aria-label="More options"
+                title="More options"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--primary-text)">
+                  <circle cx="5" cy="12" r="2"/>
+                  <circle cx="12" cy="12" r="2"/>
+                  <circle cx="19" cy="12" r="2"/>
+                </svg>
+              </button>
+              
+              {showMenu && (
+                <div className="dropdown-menu">
+                  <button 
+                    className="menu-item"
+                    onClick={handleLikedSong}
+                    disabled={!currentUser?.user_id}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill={isLiked ? '#ef4444' : 'currentColor'}>
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                    {isLiked ? 'Remove from Liked' : 'Like'}
+                  </button>
+                  
+                  <button 
+                    className="menu-item"
+                    onClick={handleDownload}
+                    disabled={isDownloading || !currentUser?.user_id}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                    </svg>
+                    {isDownloading ? 'Downloading...' : (isDownloaded ? 'Downloaded' : 'Download')}
+                  </button>
+                  
+                  <div className="menu-divider"></div>
+                  
+                  <div className="menu-item-with-submenu">
+                    <button 
+                      className="menu-item"
+                      onClick={handlePlaylistMenuClick}
+                      disabled={!currentUser?.user_id || userPlaylists.length === 0}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 5v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.11 0-2 .9-2 2zm12 4c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3zm-9 8c0-2 4-3.1 6-3.1s6 1.1 6 3.1v1H6v-1z"/>
+                      </svg>
+                      Add to Playlist
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="submenu-arrow">
+                        <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                      </svg>
+                    </button>
+                    
+                    {showPlaylistMenu && (
+                      <div className="submenu">
+                        {userPlaylists.length > 0 ? (
+                          userPlaylists.map((playlist) => (
+                            <button
+                              key={playlist.playlist_id}
+                              className="submenu-item"
+                              onClick={() => handleAddToPlaylist(playlist.playlist_id)}
+                              disabled={isAddingToPlaylist}
+                            >
+                              {playlist.playlist_name}
+                            </button>
+                          ))
+                        ) : (
+                          <div className="submenu-item disabled">
+                            No playlists found
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
             <div className="custom-controls-left">
               <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                   <path d="M0 0 C3.09846001 2.35187136 5.75614157 5.00135655 8.4375 7.8125 C9.13037109 8.49892578 9.82324219 9.18535156 10.53710938 9.89257812 C16.49167548 15.97371472 19.41241211 21.05737292 19.5625 29.8125 C19.62630859 31.49279297 19.62630859 31.49279297 19.69140625 33.20703125 C17.58923003 44.73930871 7.77716605 52.74708331 -0.2097168 60.6003418 C-1.5563628 61.93929918 -2.90209217 63.27917898 -4.24697876 64.61990356 C-7.13046434 67.49080419 -10.02002982 70.35538642 -12.91452599 73.21518517 C-17.49296399 77.73929442 -22.05589191 82.27883619 -26.61665344 86.820755 C-36.29511476 96.45492951 -45.99043457 106.07205678 -55.6875 115.6875 C-66.16819789 126.08004823 -76.64591328 136.47550245 -87.10424167 146.89056903 C-91.63721659 151.40363711 -96.17975885 155.90677834 -100.72991407 160.40252149 C-103.55737126 163.2001199 -106.37649738 166.00600016 -109.19343948 168.81418228 C-110.49966016 170.11292253 -111.80933044 171.40820403 -113.12270164 172.69971275 C-114.91738674 174.46545876 -116.69924654 176.24324553 -118.4785614 178.02445984 C-118.99879008 178.53030867 -119.51901875 179.0361575 -120.05501193 179.55733508 C-125.19218311 184.75340341 -127.75086683 190.65057142 -128 198 C-125.93794959 211.38139095 -114.23186839 219.89339474 -105.05981445 228.99023438 C-103.75469548 230.28851278 -102.4498318 231.58704787 -101.14520264 232.88581848 C-98.34845162 235.66930059 -95.5502823 238.45134619 -92.75109291 241.2323761 C-88.32211749 245.63338521 -83.89866708 250.03991923 -79.47636414 254.44763184 C-77.95884717 255.9600059 -76.44132335 257.4723731 -74.92379284 258.98473358 C-74.16422578 259.74171508 -73.40465873 260.49869658 -72.62207448 261.27861691 C-62.33494414 271.52976192 -52.04306402 281.7761027 -41.7409668 292.01220703 C-34.7775466 298.93110976 -27.82128879 305.85712769 -20.87304467 312.79127169 C-17.2007429 316.45551117 -13.52482846 320.11595689 -9.84002113 323.7676239 C-6.37665945 327.19988614 -2.92274421 330.64137735 0.52423096 334.09009361 C1.78812217 335.35129441 3.05543572 336.6090766 4.32645607 337.86309242 C6.06604824 339.58041898 7.7927283 341.30980525 9.51689148 343.04260254 C10.0179614 343.53133897 10.51903132 344.02007541 11.03528517 344.52362204 C15.57410441 349.13386164 18.57670841 354.1614564 19.53125 360.5625 C19.51578125 362.2640625 19.51578125 362.2640625 19.5 364 C19.51546875 365.7015625 19.51546875 365.7015625 19.53125 367.4375 C18.30408252 375.66674074 13.66580011 381.05792733 7.875 386.75 C7.20847412 387.40814697 6.54194824 388.06629395 5.85522461 388.74438477 C-0.15544994 394.48234137 -5.63338188 397.90861416 -14.0625 398.4375 C-21.8523369 397.57196257 -26.40371705 395.84938073 -32.24134827 390.40873718 C-33.01251703 389.69010436 -33.01251703 389.69010436 -33.79926497 388.9569537 C-41.32052495 381.89252524 -48.59048243 374.56587241 -55.88842773 367.27270508 C-57.55675261 365.6090185 -59.22527107 363.94552603 -60.89396667 362.2822113 C-65.3918226 357.79737198 -69.88643127 353.30929283 -74.38001513 348.8201735 C-77.19115719 346.01197573 -80.0028796 343.20436029 -82.81477547 340.39691734 C-90.61903944 332.60481872 -98.42237552 324.81179352 -106.22225857 317.01530933 C-106.71907322 316.51871425 -107.21588787 316.02211916 -107.72775752 315.51047574 C-108.22564418 315.01280735 -108.72353084 314.51513897 -109.23650497 314.00238973 C-110.24515215 312.994186 -111.25380088 311.98598382 -112.26245117 310.9777832 C-112.76275811 310.47769769 -113.26306505 309.97761218 -113.77853281 309.46237256 C-121.90382301 301.3410392 -130.03585909 293.22649632 -138.17078149 285.11481241 C-146.54683103 276.7624957 -154.91722473 268.40454557 -163.28199917 260.04093665 C-167.9692732 255.35457725 -172.65907556 250.67079785 -177.35482597 245.99292946 C-181.76507306 241.59915596 -186.16811077 237.19828416 -190.56573677 232.79187965 C-192.17841501 231.17843105 -193.79365271 229.56753594 -195.41165161 227.95942307 C-197.62333165 225.7604652 -199.82551318 223.55240224 -202.02561951 221.34187317 C-202.66433107 220.71121801 -203.30304264 220.08056285 -203.9611091 219.43079692 C-210.39158169 212.9290724 -215.07081321 206.62744194 -215.25 197.25 C-214.86917741 179.83371364 -195.75598358 166.60655795 -184.2409668 155.09570312 C-182.57402635 153.42576474 -180.90728909 151.7556235 -179.24073792 150.08529663 C-174.74767795 145.58346441 -170.25143801 141.0848217 -165.75431037 136.5870533 C-162.46850871 133.300418 -159.1837437 130.01274814 -155.89907459 126.72498104 C-147.06265063 117.88027857 -138.22397317 109.03783463 -129.38305166 100.19762784 C-128.88305818 99.69767433 -128.38306471 99.19772081 -127.86791992 98.68261719 C-127.36730979 98.18204794 -126.86669966 97.68147869 -126.35091952 97.16574067 C-118.21669622 89.03192486 -110.08748935 80.89311564 -101.96050682 72.75206572 C-93.59503845 64.37223226 -85.2258458 55.99613434 -76.85275966 47.62391233 C-72.15996306 42.93144728 -67.46880548 38.23736454 -62.78146935 33.53944397 C-58.38061317 29.12891914 -53.97499831 24.72320433 -49.56566429 20.32115555 C-47.94902969 18.70556779 -46.33410181 17.08827012 -44.72101212 15.46914291 C-42.51905803 13.25948141 -40.31102719 11.05607463 -38.10136414 8.85412598 C-37.46488329 8.21250157 -36.82840245 7.57087716 -36.1726343 6.90980959 C-25.32007546 -3.85919765 -13.83770812 -7.23272968 0 0 Z " transform="translate(260,59)"/>
@@ -177,6 +423,16 @@ const Player = ({}) => {
                 <path d="M0 0 C2.073156 1.85912532 4.03294997 3.78942635 5.9806416 5.77959299 C6.72957012 6.52057269 7.47849863 7.2615524 8.25012195 8.02498603 C10.73930228 10.49501974 13.20659374 12.98578695 15.67439771 15.47716379 C17.4612075 17.25911441 19.24930729 19.03977232 21.03859448 20.81923532 C25.38023205 25.14404224 29.70774282 29.48255195 34.02877133 33.82793805 C39.06632964 38.89282576 44.11919988 43.94232309 49.17254825 48.99144831 C58.19062232 58.00315183 67.19379482 67.02959855 76.18904614 76.06407785 C84.90866959 84.82171699 93.64013047 93.56733318 102.38435864 102.30040598 C111.91812599 111.82204657 121.44559681 121.34990228 130.96194065 130.88895965 C131.97740589 131.90683935 132.99287237 132.9247178 134.00834012 133.94259501 C134.50789546 134.44335743 135.00745081 134.94411985 135.52214419 135.46005689 C139.03564482 138.98130206 142.55338656 142.49827572 146.07266355 146.01374674 C150.81187319 150.74825903 155.54001269 155.49356964 160.26102948 160.24623346 C161.99422069 161.98790231 163.73080548 163.72620168 165.47102475 165.46084833 C167.84755075 167.83091758 170.21139012 170.21296643 172.57243848 172.59844065 C173.26211851 173.28056203 173.95179853 173.96268341 174.66237795 174.66547513 C179.68756131 179.7828541 183.35198032 184.79760751 184.42683911 192.0054841 C184.41652661 193.1398591 184.40621411 194.2742341 184.39558911 195.4429841 C184.41105786 197.1445466 184.41105786 197.1445466 184.42683911 198.8804841 C183.18990847 207.17519546 178.39657327 212.52428599 172.59021497 218.24956369 C171.48381239 219.36426786 171.48381239 219.36426786 170.35505825 220.50149131 C167.89189191 222.9782229 165.41474389 225.44046399 162.93733716 227.90294504 C161.16403866 229.68002816 159.3915992 231.45796883 157.61995435 233.23670053 C153.31177403 237.55738551 148.99438207 241.8686715 144.67241701 246.17556229 C139.63584889 251.19523402 134.60937261 256.2249614 129.58311746 261.25495592 C120.6127612 270.23118519 111.63243133 279.19737062 102.64680982 288.15831614 C93.93447701 296.84672625 85.23061274 305.54351108 76.53548169 314.24913645 C67.0583697 323.7376661 57.57652626 333.22142094 48.08649212 342.69702792 C47.07396501 343.70802925 46.06144062 344.71903329 45.04891896 345.73004007 C44.55077994 346.22742128 44.05264092 346.72480249 43.53940677 347.23725586 C40.0349731 350.73695354 36.53383698 354.23992937 33.0339005 357.74412394 C28.32073378 362.46274097 23.59951734 367.17315942 18.87283063 371.87823915 C17.13966378 373.60584323 15.40903453 375.33599738 13.681144 377.06887865 C11.3216033 379.43437859 8.95301831 381.79043823 6.58191419 384.14433908 C5.90077091 384.8314924 5.21962764 385.51864572 4.51784366 386.22662187 C-1.52750579 392.19249288 -7.15860106 396.10767496 -15.79191089 396.6929841 C-27.35651212 396.41509165 -33.63571324 390.00437154 -41.40909839 382.0992341 C-47.74568538 375.32163923 -50.3895667 369.79144077 -50.60050464 360.4820466 C-48.77178571 349.27934328 -40.89517823 342.57160653 -33.15348315 334.97203684 C-31.81017208 333.63505435 -30.46798727 332.29693946 -29.12684131 330.95778513 C-26.24591971 328.08586348 -23.35733552 325.22196502 -20.46247554 322.36409426 C-15.88178163 317.84164802 -11.31931874 313.30110023 -6.75918078 308.75794077 C1.27823833 300.75503715 9.33078319 292.76749223 17.38680005 284.78331614 C29.51400023 272.76404502 41.62949112 260.73300178 53.73031312 248.6871739 C58.26251386 244.17672044 62.8026405 239.67444714 67.34929574 235.17856634 C70.17958292 232.37710384 73.003667 229.56944902 75.82622647 226.76020288 C77.13246399 225.46274852 78.44129982 224.16790381 79.7529633 222.87593508 C92.09518621 211.2950519 92.09518621 211.2950519 97.14558911 195.6929841 C96.71865215 180.20940371 80.08456622 168.49635275 69.76082349 158.27403879 C68.48303403 157.00474133 67.2055152 155.73517138 65.92824292 154.46535349 C63.20303041 151.75670801 60.4764114 149.04948944 57.7487843 146.34327555 C53.43267451 142.06007346 49.1227645 137.77066887 44.81416821 133.47991037 C43.33295982 132.00496108 41.85175102 130.5300122 40.37054181 129.05506372 C39.62955149 128.31718953 38.88856116 127.57931533 38.12511659 126.81908131 C28.11110465 116.84794769 18.09245816 106.88153718 8.05965161 96.92931223 C1.26537391 90.18950867 -5.51997469 83.44085465 -12.29523492 76.68193221 C-15.87283894 73.1136887 -19.45487349 69.55016098 -23.04796863 65.99751139 C-26.42080615 62.66254587 -29.78179704 59.3160876 -33.13412738 55.96051264 C-34.36370445 54.73390178 -35.59756209 53.51156419 -36.83603168 52.29393244 C-38.52998803 50.62721917 -40.20768132 48.94561963 -41.88236499 47.25957346 C-42.37194643 46.78523835 -42.86152786 46.31090324 -43.3659451 45.82219434 C-48.15226099 40.93699755 -50.51997798 34.92815769 -50.60441089 28.0679841 C-50.15216255 16.71499128 -43.2031586 9.82874812 -35.45597339 2.3257966 C-25.00303617 -7.1628247 -11.64728309 -8.61761599 0 0 Z "  transform="translate(95.10441088676453,60.557015895843506)"/>
               </svg>
             </div>
+            <button className={`like-btn ${isLiked ? 'liked' : ''}`} aria-label="like" onClick={handleLikedSong}>
+              {isLiked ? 
+              <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="-2 -3 35 35">
+                  <path d="M0 0 C2.5 1 2.5 1 4 2 C4.66 1.34 5.32 0.68 6 0 C10.80073273 -0.55090376 12.91189752 -0.70273285 17 1.9375 C19.30695303 5.47002182 19.798296 7.5098192 19.54296875 11.6640625 C18.00068008 18.29923246 12.37022575 23.24984982 6.93359375 26.98046875 C5 28 5 28 2.0625 28.375 C-4.3926818 25.47675511 -9.82451291 20.33131172 -13 14 C-13.96505007 9.30342301 -13.63019087 5.96497977 -11 1.9375 C-6.87978546 -0.72347189 -4.85408949 -0.53934328 0 0 Z " fill="#e9153c" transform="translate(13,2)"/>
+              </svg>
+               : 
+              <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="-2 -3 35 35">
+                  <path d="M0 0 C2.5 1 2.5 1 4 2 C4.66 1.34 5.32 0.68 6 0 C10.80073273 -0.55090376 12.91189752 -0.70273285 17 1.9375 C19.30695303 5.47002182 19.798296 7.5098192 19.54296875 11.6640625 C18.00068008 18.29923246 12.37022575 23.24984982 6.93359375 26.98046875 C5 28 5 28 2.0625 28.375 C-4.3926818 25.47675511 -9.82451291 20.33131172 -13 14 C-13.96505007 9.30342301 -13.63019087 5.96497977 -11 1.9375 C-6.87978546 -0.72347189 -4.85408949 -0.53934328 0 0 Z " transform="translate(13,2)"/>
+              </svg>}
+            </button>
           </div>
         </div>
       </div>

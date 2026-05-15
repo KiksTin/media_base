@@ -5,35 +5,262 @@
     width: 210px;
     height: 130px;
     padding: 10px;
-
     border-radius: 10px;
     cursor: pointer;
     align-content: center;
     justify-content: center;
+    justify-items: center;
+    transition: all 0.3s ease;
 
-    h2{
-    position: absolute;
-    bottom: 0;
-    left: 5px;
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px var(--shadow);
     }
-    .playlist-cover{
+    h2 {
+        position: absolute;
+        bottom: 0;
+        left: 5px;
+        color: var(--primary-text);
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-shadow: 0 1px 2px var(--shadow);
+    }
+    
+    .playlist-cover, .create-playlist-card{
         position: absolute;
         top: 5px;
         left: 5px;
         width: 100%;
         height: 100%;
-        object-fit:fill;
+        object-fit: cover;
         border-radius: 10px;
         transition: filter 0.4s ease, scale 0.4s ease;
         filter: brightness(0.8);
 
-        &:hover{
+        &:hover {
             filter: brightness(1.2);
             scale: 1.05;
         }
-
+    }
+}
+ .create-playlist-card {
+        background-color: var(--songs-n-player-bg);
+        border: 2px dashed var(--border);
+        
+        &:hover {
+            border-color: var(--accent);
+        }
+        
+        h2 {
+            position: absolute;
+            bottom: -10px;
+            left: 10px;
+            color: var(--accent);
+            font-size: 3rem;
+            font-weight: 300;
+        }
     }
 
+.playlist-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.playlist-modal {
+    background-color: var(--songs-n-player-bg);
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.playlist-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    
+    h2 {
+        margin: 0;
+        color: var(--primary-text);
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .modal-close-btn {
+        background: none;
+        border: none;
+        color: var(--secondary-text);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        
+        &:hover {
+            color: var(--primary-text);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    }
+}
+
+.playlist-modal-form {
+    .form-group {
+        margin-bottom: 20px;
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary-text);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background-color: var(--background);
+            color: var(--primary-text);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            
+            &:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+            }
+            
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+            
+            &::placeholder {
+                color: var(--secondary-text);
+            }
+        }
+        
+        input[type="url"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background-color: var(--background);
+            color: var(--primary-text);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            
+            &:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+            }
+            
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+            
+            &::placeholder {
+                color: var(--secondary-text);
+            }
+        }
+        
+        .form-help {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: var(--secondary-text);
+            line-height: 1.4;
+        }
+        
+        .char-count {
+            margin-top: 4px;
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--secondary-text);
+        }
+    }
+    
+    .error-message {
+        background-color: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #ef4444;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+    }
+    
+    .modal-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+        }
+        
+        .cancel-btn {
+            background-color: transparent;
+            color: var(--secondary-text);
+            border: 1px solid var(--border);
+            
+            &:hover:not(:disabled) {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: var(--primary-text);
+            }
+        }
+        
+        .create-btn {
+            background-color: var(--accent);
+            color: white;
+            
+            &:hover:not(:disabled) {
+                background-color: var(--accent);
+                filter: brightness(1.1);
+            }
+            
+            &:disabled {
+                background-color: var(--border);
+                color: var(--secondary-text);
+            }
+        }
+    }
 }
 
 @media (max-width: 600px) {
