@@ -1,182 +1,69 @@
-.download-container{
+.download-content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+    padding: 25px;
+    gap: 15px;
+    flex: 1;
+    margin: 0;
+    height: calc(100dvh - 70px);
+}
+.download-item{
     display: flex;
     flex-direction: row;
+    align-items: center;
+    position: relative;
+
+    padding: 10px 30px;
+
+    height: fit-content;
+    cursor: pointer;
+
+     img{
+        height: 70px;
+        width: 70px;
+        border-radius: 10px;
+    }
+     h3{
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary-text);
+        }
+        p{
+             font-size: medium;
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: var(--secondary-text);
+        }
+
+       &:hover{
+        transition: all 0.4s ease-in-out;
+        background-color: var(--background-2);
+    }
+}
+.download-item-info{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+.remove-download-btn{
+    right: 50;
+    position: absolute;
+    cursor: pointer;
+    align-self: center;
+    display: flex;
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    align-items: center;
     justify-content: center;
-    padding: 25px;
-    flex: 1;
-    height: calc(100dvh - 70px);
 
-    .container {
-        width: 100%;
-        max-width: 1200px;
-        
-        .header {
-            margin-bottom: 20px;
-            
-            h1 {
-                color: var(--primary-text);
-                margin-bottom: 5px;
-            }
-            
-            .download-count {
-                color: var(--secondary-text);
-                font-size: 0.9em;
-                margin: 0;
-            }
-        }
-        
-        .downloads-content {
-            .loading {
-                text-align: center;
-                color: var(--secondary-text);
-                padding: 40px;
-                font-style: italic;
-            }
-            
-            .downloads-list {
-                display: grid;
-                gap: 15px;
-                
-                .download-item {
-                    display: flex;
-                    align-items: center;
-                    background-color: var(--songs-n-player-bg);
-                    padding: 10px 30px;
-                    transition: all 0.3s ease;
-                    
-                    &:hover {
-                        background-color: var(--background-2);
-                    }
-                    
-                    .download-item-info {
-                        display: flex;
-                        align-items: center;
-                        flex: 1;
-                        cursor: pointer;
-                        
-                        .download-item-image {
-                            width: 60px;
-                            height: 60px;
-                            border-radius: 8px;
-                            object-fit: cover;
-                            margin-right: 15px;
-                        }
-                        
-                        .download-item-details {
-                            flex: 1;
-                            
-                            .download-item-title {
-                                color: var(--primary-text);
-                                margin: 0 0 5px 0;
-                                font-size: 1.1em;
-                                font-weight: 600;
-                            }
-                            
-                            .download-item-artist {
-                                color: var(--secondary-text);
-                                margin: 0 0 3px 0;
-                                font-size: 0.9em;
-                            }
-                            
-                            .download-item-genre {
-                                color: var(--secondary-text);
-                                margin: 0 0 5px 0;
-                                font-size: 0.8em;
-                                text-transform: uppercase;
-                                letter-spacing: 0.5px;
-                            }
-                            
-                            .download-item-date {
-                                color: var(--accent);
-                                margin: 0;
-                                font-size: 0.8em;
-                            }
-                        }
-                    }
-                    
-                    .download-item-actions {
-                        .remove-download-btn {
-                            background: rgba(255, 255, 255, 0.1);
-                            border: 1px solid var(--border);
-                            color: var(--primary-text);
-                            width: 32px;
-                            height: 32px;
-                            border-radius: 50%;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            cursor: pointer;
-                            transition: all 0.3s ease;
-                            font-size: 14px;
-                            
-                            &:hover {
-                                background-color: #ff4444;
-                                border-color: #ff4444;
-                                color: white;
-                                transform: scale(1.1);
-                            }
-                            
-                            &:active {
-                                transform: scale(0.95);
-                            }
-                        }
-                    }
-                }
-            }
-            
-            .no-downloads {
-                text-align: center;
-                padding: 60px 20px;
-                color: var(--secondary-text);
-                
-                h2 {
-                    color: var(--primary-text);
-                    margin-bottom: 10px;
-                    font-size: 1.5em;
-                }
-                
-                p {
-                    margin: 0;
-                    font-style: italic;
-                }
-            }
-        }
+    &:hover{
+        scale: 1.1;
+        transition: all 0.2s ease-in-out;
+        background-color: rgb(183, 0, 0);
     }
 }
-
-@media (max-width: 768px) {
-    .download-container {
-        padding: 15px;
-        
-        .container {
-            .downloads-content {
-                .downloads-list {
-                    .download-item {
-                        padding: 12px;
-                        
-                        .download-item-info {
-                            .download-item-image {
-                                width: 50px;
-                                height: 50px;
-                                margin-right: 12px;
-                            }
-                            
-                            .download-item-details {
-                                .download-item-title {
-                                    font-size: 1em;
-                                }
-                                
-                                .download-item-artist,
-                                .download-item-genre,
-                                .download-item-date {
-                                    font-size: 0.8em;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-    

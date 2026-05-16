@@ -14,6 +14,10 @@ interface SongContextType {
   setCurrentSong: (song: Song | null) => void;
   isPlaying: boolean;
   setIsPlaying: (playing: boolean) => void;
+  playlist: Song[];
+  setPlaylist: (songs: Song[]) => void;
+  currentIndex: number;
+  setCurrentIndex: (index: number) => void;
 }
 
 const SongContext = createContext<SongContextType | undefined>(undefined);
@@ -29,9 +33,11 @@ export const useSongContext = () => {
 export const SongProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [playlist, setPlaylist] = useState<Song[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   return (
-    <SongContext.Provider value={{ currentSong, setCurrentSong, isPlaying, setIsPlaying }}>
+    <SongContext.Provider value={{ currentSong, setCurrentSong, isPlaying, setIsPlaying, playlist, setPlaylist, currentIndex, setCurrentIndex }}>
       {children}
     </SongContext.Provider>
   );

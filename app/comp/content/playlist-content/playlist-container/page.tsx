@@ -33,76 +33,67 @@ const PlaylistContainer = ({currentUser, onPlaylistSelect}: PlaylistContainerPro
   const [playlistName, setPlaylistName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState('');
-  const [coverUrl, setCoverUrl] = useState('');
+  const [coverFile, setCoverFile] = useState<File | null>(null);
   const [showCoverUpload, setShowCoverUpload] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
 
   const handleCreatePlaylist = () => {
     setShowCreateModal(true);
     setPlaylistName('');
-    setCoverUrl('');
+    setCoverFile(null);
     setError('');
   };
 
   const handleCloseModal = () => {
     setShowCreateModal(false);
     setPlaylistName('');
-    setCoverUrl('');
+    setCoverFile(null);
     setError('');
     setShowCoverUpload(false);
   };
 
-  const handleCoverUrlSubmit = async (e: React.FormEvent) => {
+  const handleCoverUrlSubmit = async (e: React.FormEvent, playlistId?: number) => {
     e.preventDefault();
-    
-    if (!coverUrl.trim()) {
-      setError('Cover URL is required');
+
+    if (!coverFile) {
+      setError('Cover image is required');
       return;
     }
-    
-    // Basic URL validation
-    try {
-      new URL(coverUrl);
-    } catch {
-      setError('Please enter a valid URL');
-      return;
-    }
-    
+
     const userToUse = currentUser || contextUser;
     if (!userToUse?.user_id) {
       setError('You must be logged in to update playlist covers');
       return;
     }
-    
+
+    if (!playlistId) {
+      setError('Playlist ID is required');
+      return;
+    }
+
     setIsUploadingCover(true);
     setError('');
-    
+
     try {
+      const formData = new FormData();
+      formData.append('image', coverFile);
+      formData.append('playlist_id', playlistId.toString());
+
       const response = await fetch('/api/update-playlist-cover', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          cover_url: coverUrl.trim(),
-          user_id: userToUse.user_id,
-          playlist_id: 1 // Default playlist ID for now
-        })
+        body: formData
       });
-      
+
       const data = await response.json();
-      
+
       if (response.ok && data.success) {
-        console.log('Cover updated successfully');
         setShowCoverUpload(false);
-        setCoverUrl('');
-        // Refresh playlists to show updated cover
+        setCoverFile(null);
         await fetchUserPlaylists();
       } else {
         setError(data.error || 'Failed to update cover');
       }
     } catch (error) {
-      console.error('Error updating cover:', error);
       setError('Failed to update cover. Please try again.');
     } finally {
       setIsUploadingCover(false);
@@ -151,11 +142,11 @@ const PlaylistContainer = ({currentUser, onPlaylistSelect}: PlaylistContainerPro
       const data = await response.json();
 
       if (response.ok && data.success) {
-        // If cover URL was provided, update it
-        if (coverUrl.trim()) {
-          await handleCoverUrlSubmit(e);
+        // If cover file was provided, update it
+        if (coverFile && data.playlist?.playlist_id) {
+          await handleCoverUrlSubmit(e, data.playlist.playlist_id);
         }
-        
+
         // Refresh playlists list
         await fetchUserPlaylists();
         handleCloseModal();
@@ -230,7 +221,7 @@ const PlaylistContainer = ({currentUser, onPlaylistSelect}: PlaylistContainerPro
   const handleUpdateCover = (playlistId: number) => {
     const playlist = playlists.find(p => p.playlist_id === playlistId);
     if (playlist) {
-      setCoverUrl(playlist.playlist_cover || '');
+      setCoverFile(null);
       setShowCoverUpload(true);
     }
   };
@@ -281,17 +272,16 @@ const PlaylistContainer = ({currentUser, onPlaylistSelect}: PlaylistContainerPro
               </div>
               
               <div className="form-group">
-                <label htmlFor="cover-url">Cover Image URL (Optional)</label>
+                <label htmlFor="cover-url">Cover Image (Optional)</label>
                 <input
-                  type="url"
+                  type="file"
                   id="cover-url"
-                  value={coverUrl}
-                  onChange={(e) => setCoverUrl(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
+                  accept="image/*"
+                  onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
                   disabled={isCreating}
                 />
                 <div className="form-help">
-                  Enter a URL to an image (jpg, png, gif, webp, svg)
+                  Upload an image file (jpg, png, gif, webp, svg)
                 </div>
               </div>
               

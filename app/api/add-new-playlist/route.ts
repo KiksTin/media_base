@@ -15,22 +15,8 @@ export async function POST(request: Request) {
     
     const trimmedName = playlist_name.trim();
     
-
-    try {
-      await sql`
-        CREATE TABLE IF NOT EXISTS mb_playlist (
-          playlist_id SERIAL PRIMARY KEY,
-          playlist_name VARCHAR(50) NOT NULL,
-          user_id INTEGER NOT NULL,
-          date_created DATE NOT NULL DEFAULT CURRENT_DATE,
-          FOREIGN KEY (user_id) REFERENCES mb_user(user_id)
-        )
-      `;
-    } catch (tableError) {
-      console.log('Table creation error (might already exist):', tableError);
-    }
-
     let existingPlaylist: any[] = [];
+    
     try {
       existingPlaylist = await sql`
         SELECT playlist_id FROM mb_playlist

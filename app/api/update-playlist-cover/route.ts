@@ -1,76 +1,59 @@
 import { neon } from '@neondatabase/serverless';
+import { NextRequest, NextResponse } from 'next/server';
+import cloudinary from '@/app/utils/cloudinary';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const sql = neon(process.env.DATABASE_URL!);
-    const { playlist_id, user_id, cover_url } = await request.json();
-    
-    if (!playlist_id || !user_id || !cover_url) {
-      return Response.json({ error: 'playlist_id, user_id, and cover_url are required' }, { status: 400 });
-    }
-    
-    try {
-      const url = new URL(cover_url);
-      const validImageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
-      const hasValidExtension = validImageExtensions.some(ext => 
-        url.pathname.toLowerCase().endsWith(ext)
+    const formData = await request.formData();
+    const file = formData.get('image') as File;
+    const playlist_id = formData.get('playlist_id') as string;
+
+    if (!file || !playlist_id) {
+      return NextResponse.json(
+        { error: 'image file and playlist_id are required' },
+        { status: 400 }
       );
-      
-      if (!hasValidExtension) {
-        return Response.json({ 
-          error: 'Invalid image URL. Must end with .jpg, .jpeg, .png, .gif, .webp, or .svg' 
-        }, { status: 400 });
-      }
-      
-      const response = await fetch(cover_url, { method: 'HEAD' });
-      if (!response.ok) {
-        return Response.json({ 
-          error: 'Unable to access the provided image URL' 
-        }, { status: 400 });
-      }
-      
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.startsWith('image/')) {
-        return Response.json({ 
-          error: 'URL does not point to a valid image file' 
-        }, { status: 400 });
-      }
-      
-    } catch (urlError) {
-      return Response.json({ 
-        error: 'Invalid URL format provided' 
-      }, { status: 400 });
     }
-    
-    try {
-      const result = await sql`
-        UPDATE mb_playlist 
-        SET playlist_cover = ${cover_url}
-        WHERE playlist_id = ${playlist_id} AND user_id = ${user_id}
-        RETURNING playlist_id, playlist_name, playlist_cover, date_created
-      `;
-      
-      const updatedPlaylist = result[0];
-      
-      return Response.json({ 
-        success: true, 
-        message: 'Playlist cover updated successfully',
-        playlist: updatedPlaylist
-      });
-      
-    } catch (error) {
-      console.error('Error updating playlist cover:', error);
-      return Response.json({ 
-        error: 'Failed to update playlist cover', 
-        details: error instanceof Error ? error.message : 'Unknown error' 
-      }, { status: 500 });
-    }
-    
+
+    // Convert file to buffer
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Upload to Cloudinary
+    const result = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        {
+          folder: 'playlist-covers',
+          resource_type: 'image',
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      ).end(buffer);
+    }) as any;
+
+    const coverUrl = result.secure_url;
+
+    // Update database with Cloudinary URL
+    const sql = neon(process.env.DATABASE_URL!);
+    await sql`
+      UPDATE mb_playlist
+      SET playlist_cover = ${coverUrl}
+      WHERE playlist_id = ${playlist_id}
+    `;
+
+    console.log('Cover URL updated for playlist:', playlist_id, coverUrl);
+
+    return NextResponse.json(
+      { success: true, message: 'Cover updated successfully', cover_url: coverUrl },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error('Error in update playlist cover API:', error);
-    return Response.json({ 
-      error: 'Failed to update playlist cover', 
-      details: error instanceof Error ? error.message : 'Unknown error' 
-    }, { status: 500 });
+    console.error('Error updating playlist cover:', error);
+    return NextResponse.json(
+      { error: 'Failed to update playlist cover' },
+      { status: 500 }
+    );
   }
 }

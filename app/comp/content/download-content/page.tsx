@@ -1,7 +1,6 @@
 
 'use client'
 import './page.css'
-import SelectSong from '../select-song/select-song';
 import { useState, useEffect } from 'react';
 import { useClientContext } from '../../../context/ClientContext';
 import DownloadManager, { DownloadedSong } from '../../../utils/downloadManager';
@@ -18,8 +17,7 @@ const DownloadContent = () => {
       try {
         const songs = DownloadManager.getDownloadedSongs();
         setDownloadedSongs(songs);
-        
-        // Sync with server if user is logged in
+     
         if (currentUser?.user_id) {
           DownloadManager.syncWithServer(currentUser.user_id).then(() => {
             const syncedSongs = DownloadManager.getDownloadedSongs();
@@ -59,18 +57,16 @@ const DownloadContent = () => {
   };
 
   return (
-    <div className='download-container'>
+    <div className="download-content">
     <div className="container">
     <div className='header'>
         <h1>Your Downloads</h1>
-        &nbsp;
-        <p className="download-count">{downloadedSongs.length} {downloadedSongs.length === 1 ? 'song' : 'songs'} downloaded</p>
     </div>
-    <div className='downloads-content'>
+    <div className='select-song'>
       {loading ? (
         <div className="loading">Loading downloads...</div>
       ) : downloadedSongs.length > 0 ? (
-        <div className="downloads-list">
+        <div className="select-song">
           {downloadedSongs.map((song) => (
             <div key={song.song_id} className="download-item">
               <div className="download-item-info" onClick={() => handleSongClick(song)}>
@@ -82,8 +78,6 @@ const DownloadContent = () => {
                 <div className="download-item-details">
                   <h3 className="download-item-title">{song.song_name}</h3>
                   <p className="download-item-artist">{song.song_artist}</p>
-                  <p className="download-item-genre">{song.song_genre}</p>
-                  <p className="download-item-date">Downloaded: {formatDownloadDate(song.download_date)}</p>
                 </div>
               </div>
               <div className="download-item-actions">

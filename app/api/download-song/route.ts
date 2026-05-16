@@ -9,7 +9,6 @@ export async function POST(request: Request) {
       return Response.json({ error: 'song_id and user_id are required' }, { status: 400 });
     }
     
-    // Check if song exists
     const songExists = await sql`
       SELECT * FROM mb_song_tbl 
       WHERE song_id = ${song_id}
@@ -21,7 +20,7 @@ export async function POST(request: Request) {
     
     const song = songExists[0];
     
-    // Try to create the downloads table if it doesn't exist
+   
     try {
       await sql`
         CREATE TABLE IF NOT EXISTS mb_downloads (
@@ -37,7 +36,7 @@ export async function POST(request: Request) {
       console.log('Table creation error (might already exist):', tableError);
     }
     
-    // Check if already downloaded
+
     let existingDownload: any[] = [];
     try {
       existingDownload = await sql`
@@ -50,7 +49,7 @@ export async function POST(request: Request) {
     }
     
     if (existingDownload && existingDownload.length > 0) {
-      // Update existing download record
+   
       try {
         await sql`
           UPDATE mb_downloads 
@@ -61,7 +60,7 @@ export async function POST(request: Request) {
         console.log('Update failed, table might not exist:', error);
       }
     } else {
-      // Add new download record
+     
       try {
         await sql`
           INSERT INTO mb_downloads (song_id, user_id, download_date) 
@@ -69,7 +68,7 @@ export async function POST(request: Request) {
         `;
       } catch (error) {
         console.log('Insert failed, table might not exist:', error);
-        // Continue anyway - we'll still return success for local storage
+    
       }
     }
     
