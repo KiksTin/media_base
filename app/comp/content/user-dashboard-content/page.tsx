@@ -24,6 +24,10 @@ export default function UserLog({ currentUser }: { currentUser: any }) {
     const [showChangeProfile, setShowChangeProfile] = useState(false);
     const [showChangeCover, setShowChangeCover] = useState(false);
     const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+    const [showRatingSurvey, setShowRatingSurvey] = useState(false);
+    const [rating, setRating] = useState(0);
+    const [ratingComment, setRatingComment] = useState('');
+    const [isSubmittingRating, setIsSubmittingRating] = useState(false);
 
     // Password change state
     const [currentPassword, setCurrentPassword] = useState('');
@@ -374,6 +378,58 @@ export default function UserLog({ currentUser }: { currentUser: any }) {
         }
     };
 
+    const handleLogoutClick = () => {
+        setShowRatingSurvey(true);
+    };
+
+    const handleRatingSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (rating === 0) {
+            setError('Please select a rating');
+            return;
+        }
+
+        setIsSubmittingRating(true);
+        setError('');
+
+        try {
+            const response = await fetch('/api/submit-rating', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_id: currentUser?.user_id,
+                    rating,
+                    comment: ratingComment,
+                }),
+            });
+
+            if (response.ok) {
+                setShowRatingSurvey(false);
+                setRating(0);
+                setRatingComment('');
+                logout();
+                window.location.href = '/';
+            } else {
+                const data = await response.json();
+                setError(data.error || 'Failed to submit rating');
+            }
+        } catch (error) {
+            console.error('Error submitting rating:', error);
+            setError('Failed to submit rating. Please try again.');
+        } finally {
+            setIsSubmittingRating(false);
+        }
+    };
+
+    const handleSkipRating = () => {
+        setShowRatingSurvey(false);
+        logout();
+        window.location.href = '/';
+    };
+
     const handleDeleteAccountSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -449,7 +505,7 @@ export default function UserLog({ currentUser }: { currentUser: any }) {
                     <button type="button" onClick={handleChangeProfile}>Change Profile Picture</button>
                     <button type="button" onClick={handleChangeCover}>Change Cover Picture</button>
                     <button type="button" onClick={handleDeleteAccount}>Delete Account</button>
-                    <button type="button" onClick={logout}>Logout</button>
+                    <button type="button" onClick={handleLogoutClick}>Logout</button>
                   </div>
                   </>
                 )}
@@ -918,6 +974,66 @@ export default function UserLog({ currentUser }: { currentUser: any }) {
                                 disabled={!deletePassword || !deleteConfirm}
                             >
                                 Delete Account
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            </>
+        )}
+        {showRatingSurvey && (
+            <>
+            <div className="playlist-modal-overlay" onClick={() => setShowRatingSurvey(false)}>
+                <div className="playlist-modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="playlist-modal-header">
+                        <h2>Rate Your Experience</h2>
+                        <button className="modal-close-btn" onClick={() => setShowRatingSurvey(false)}>×</button>
+                    </div>
+                    <form onSubmit={handleRatingSubmit} className="playlist-modal-form">
+                        <div className="form-group">
+                            <label>How would you rate your experience?</label>
+                            <div className="rating-stars">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <button
+                                        key={star}
+                                        type="button"
+                                        className={`star-button ${star <= rating ? 'active' : ''}`}
+                                        onClick={() => setRating(star)}
+                                    >
+                                        ★
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="rating-comment">Additional comments (optional)</label>
+                            <textarea
+                                id="rating-comment"
+                                value={ratingComment}
+                                onChange={(e) => setRatingComment(e.target.value)}
+                                rows={4}
+                                placeholder="Tell us what you think..."
+                            />
+                        </div>
+                        {error && (
+                            <div className="error-message">
+                                {error}
+                            </div>
+                        )}
+                        <div className="modal-actions">
+                            <button
+                                type="button"
+                                className="cancel-btn"
+                                onClick={handleSkipRating}
+                            >
+                                Skip
+                            </button>
+                            <button
+                                type="submit"
+                                className="create-btn"
+                                disabled={rating === 0 || isSubmittingRating}
+                            >
+                                {isSubmittingRating ? 'Submitting...' : 'Submit & Logout'}
                             </button>
                         </div>
                     </form>

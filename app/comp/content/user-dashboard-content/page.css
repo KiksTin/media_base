@@ -221,6 +221,41 @@
     flex-direction: row;
     cursor: pointer;
 
+        textarea {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #292929;
+            backdrop-filter: blur(10px);
+            color: white;
+            width: 100%;
+            resize: vertical;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+
+            .star-button {
+                background: none;
+                border: none;
+                font-size: 32px;
+                cursor: pointer;
+                color: #666;
+                transition: color 0.2s ease;
+                padding: 0;
+
+                &:hover {
+                    color: #ffd700;
+                }
+
+                &.active {
+                    color: #ffd700;
+                }
+            }
+        }
+
         button {
             background-color: transparent;
             border: none;

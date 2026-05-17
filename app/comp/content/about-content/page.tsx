@@ -1,7 +1,28 @@
 'use client'
 import './page.css'
+import { useState, useEffect } from 'react'
 
 const AboutContent = () => {
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalRatings, setTotalRatings] = useState(0);
+
+  useEffect(() => {
+    fetchAverageRating();
+  }, []);
+
+  const fetchAverageRating = async () => {
+    try {
+      const response = await fetch('/api/get-average-rating');
+      if (response.ok) {
+        const data = await response.json();
+        setAverageRating(data.average_rating);
+        setTotalRatings(data.total_ratings);
+      }
+    } catch (error) {
+      console.error('Error fetching average rating:', error);
+    }
+  };
+
   return (
     <div className='about-container'>
       <div className='about-content'>
@@ -67,6 +88,14 @@ const AboutContent = () => {
             <p>Facebook</p>
             <p>Twitter</p>
             <p>Instagram</p>
+          </div>
+          <div className='rating-display'>
+            <h2>User Rating</h2>
+            <div className='rating-stars'>
+              <span className='rating-value'>{averageRating.toFixed(1)}</span>
+              <span className='rating-stars-text'>★</span>
+            </div>
+            <p className='total-ratings'>{totalRatings} {totalRatings === 1 ? 'rating' : 'ratings'}</p>
           </div>
         </div>
         <div className='copyright'>

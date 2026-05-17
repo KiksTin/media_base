@@ -82,6 +82,37 @@
             div{
                 flex: 1;
             }
+
+            .rating-display {
+                h2 {
+                    font-size: 1.5rem;
+                    color: var(--accent);
+                }
+
+                .rating-stars {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-top: 10px;
+
+                    .rating-value {
+                        font-size: 2rem;
+                        font-weight: bold;
+                        color: var(--primary-text);
+                    }
+
+                    .rating-stars-text {
+                        font-size: 2rem;
+                        color: #ffd700;
+                    }
+                }
+
+                .total-ratings {
+                    margin-top: 5px;
+                    font-size: 14px;
+                    color: var(--secondary-text);
+                }
+            }
         }
 
         img{
