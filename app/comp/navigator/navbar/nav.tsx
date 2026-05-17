@@ -1,10 +1,15 @@
 'use client'
 import Link from "next/link"
 import { usePathname } from 'next/navigation'
+import { useClientContext } from '../../../context/ClientContext'
 import './nav.css'
 
 export default function Nav() {
   const pathname = usePathname()
+  const { currentUser } = useClientContext()
+  
+  // Check if user is admin (for demo, we'll check if username is 'admin')
+  const isAdmin = currentUser?.user_name === 'admin'
   
   return (
     <nav>
@@ -21,6 +26,11 @@ export default function Nav() {
         <Link href="/download"><button className={pathname === "/download" ? "active" : ""} title="Download">
             <svg className="nav-icon" xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="512" height="512"><path d="M12,10a4,4,0,1,0,4,4A4,4,0,0,0,12,10Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,16Z"/><path d="M22.536,4.122,19.878,1.464A4.966,4.966,0,0,0,16.343,0H5A5.006,5.006,0,0,0,0,5V19a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V7.657A4.966,4.966,0,0,0,22.536,4.122ZM17,2.08V3a3,3,0,0,1-3,3H10A3,3,0,0,1,7,3V2h9.343A2.953,2.953,0,0,1,17,2.08ZM22,19a3,3,0,0,1-3,3H5a3,3,0,0,1-3-3V5A3,3,0,0,1,5,2V3a5.006,5.006,0,0,0,5,5h4a4.991,4.991,0,0,0,4.962-4.624l2.16,2.16A3.02,3.02,0,0,1,22,7.657Z"/></svg>
           </button></Link>
+        {isAdmin && (
+          <Link href="/admin"><button className={pathname === "/admin" ? "active" : ""} title="Admin">
+            <svg className="nav-icon" xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" width="512" height="512"><path d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0Zm0,22A10,10,0,1,1,22,12,10.011,10.011,0,0,1,12,22Z"/><path d="M12,6a6,6,0,1,0,6,6A6.007,6.007,0,0,0,12,6Zm0,10a4,4,0,1,1,4-4A4,4,0,0,1,12,16Z"/><path d="M12,18a9.941,9.941,0,0,0-7.071,2.929l1.414,1.414A8,8,0,0,1,19.657,22.343l1.414-1.414A9.941,9.941,0,0,0,12,18Z"/></svg>
+          </button></Link>
+        )}
       </div>
     </nav>
   )

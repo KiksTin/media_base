@@ -1,0 +1,152 @@
+.admin-dashboard {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.admin-header h1 {
+    color: var(--primary-text);
+    margin: 0;
+}
+
+.back-link {
+    color: var(--primary);
+    text-decoration: none;
+    padding: 10px 20px;
+    border: 1px solid var(--primary);
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.back-link:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+.admin-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.admin-tabs button {
+    padding: 10px 20px;
+    border: 1px solid var(--primary);
+    background: transparent;
+    color: var(--primary-text);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.admin-tabs button:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+.admin-tabs button.active {
+    background-color: var(--primary);
+    color: white;
+}
+
+.admin-content {
+    background: var(--background);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.admin-table {
+    margin-top: 20px;
+}
+
+.admin-table h2 {
+    color: var(--primary-text);
+    margin-bottom: 20px;
+}
+
+.admin-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--primary);
+    color: var(--primary-text);
+}
+
+.admin-table th {
+    background-color: var(--primary);
+    color: white;
+    font-weight: 600;
+}
+
+.admin-table tr:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
+}
+
+.error-message {
+    background-color: #dc3545;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: var(--primary-text);
+}
+
+.admin-error {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.admin-error h2 {
+    color: #dc3545;
+    margin-bottom: 20px;
+}
+
+.admin-error p {
+    color: var(--primary-text);
+    margin-bottom: 20px;
+}
+
+.admin-error a {
+    color: var(--primary);
+    text-decoration: none;
+    padding: 10px 20px;
+    border: 1px solid var(--primary);
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.admin-error a:hover {
+    background-color: var(--primary);
+    color: white;
+}

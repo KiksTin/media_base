@@ -5,7 +5,10 @@
   --foreground: #323232;
   --shadow: #9f9f9f;
 
-  --songs-n-player-bg: #e9e9e9d8;
+  --search-bg: #ffffff;
+  --search-bg-hover: #f2f2f2;
+
+  --songs-n-player-bg: #e9e9e9;
   --primary-text: #1e1e1e;
   --secondary-text: #5d5d5d;
   --accent: #e9153c;
@@ -19,6 +22,8 @@
     --shadow: #000000;
     --primary-text: #ededed;
     --secondary-text: #a0a0a0;
+    --search-bg: #2a2a2a;
+    --search-bg-hover: #3a3a3a;
     
     --songs-n-player-bg: #0c0c0c;
   }

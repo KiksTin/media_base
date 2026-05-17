@@ -1,8 +1,107 @@
 
 .log_container {
     display: flex;
-    padding: 35px;
     height: 90vh;
+    width: 97dvw;
+    padding-left: 15px;
+    overflow-y: auto;
+}
+
+.playlist-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.playlist-modal {
+    background-color: var(--background);
+    border-radius: 10px;
+    padding: 20px;
+    width: 500px;
+    max-width: 90%;
+
+    h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-text);
+    }
+    label {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--primary-text);
+    }
+}
+.playlist-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.playlist-modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+
+    button {
+        padding: 10px 20px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .delete-btn {
+        background-color: var(--accent);
+        color: var(--primary-text);
+
+        &:hover {
+            background-color: var(--accent);
+        }
+
+        &:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+    }
+
+    .cancel-btn {
+        background-color: #6c757d;
+        color: var(--primary-text);
+
+        &:hover {
+            background-color: #5a6268;
+        }
+    }
+
+    .create-btn {
+        background-color: var(--primary);
+        color: var(--primary-text);
+
+        &:hover {
+            background-color: var(--accent);
+        }
+
+        &:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+    }
+}
+
+.warning-text {
+    color: red !important;
+    font-weight: 600;
+    margin-bottom: 15px;
 }
 
 .profile-wrapper {
@@ -24,27 +123,36 @@
 }
 .profile-cover {
     width: 100%;
-    height: 200px;
+    height: 40dvh;
     object-fit: cover;
     position: absolute;
     top: 0;
     left: 0;
     z-index: 1;
 }
+.profile-cover-overlay {
+    width: 100%;
+    height: 40dvh;
+    background: linear-gradient(180deg, transparent 50%, var(--background) 100%);
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+}
 .profile-pic-container {
     height: 200px;
+    left: -20px;
     position: relative;
     display: flex;
     flex-direction: row;
-    top: 45%;
+    top: 80%;
     z-index: 2;
 }
 .profile-pic {
     display: flex;
     position: relative;
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
+    width: 160px;
+    height: 160px;
 }
 .profile-image {
     position: absolute;
@@ -57,7 +165,7 @@
     display: flex;
     flex-direction: column;
     justify-content: left;
-    margin-top: 40%;
+    margin-top: 27%;
     margin-left: 20px;
     flex: 1;
 }
@@ -75,9 +183,327 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    height: fit-content;
+    margin-top: 15dvh;
+}
+
+.profile-setting-container {
+    display: flex;
+    justify-content: start;
     align-items: center;
+    flex-direction: row;
+    transform: translateX(50%);
+    z-index: 2;
+    top: 50%;
+    width: 100%;
+    position: absolute;
     gap: 10px;
-    padding: 20px;
-    margin-top: 6%;
+    left: 55%;
+}
+.profile-setting-button{
+    height: 40px;
+    min-width: 40px;
+    max-width: 40px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:hover {
+        background-color: var(--accent);
+        transition: all 0.5s ease;
+    }
+}
+ .profile-settings-drop{
+    display: flex;
+    flex-direction: row;
+    cursor: pointer;
+
+        button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--primary-text);
+            font-size: 1.1rem;
+            font-weight: 200;
+            padding: 5px 20px;
+            border-radius: 3px;
+            min-width: fit-content;
+
+            &:hover {
+               color: var(--accent);
+               transition: all 0.2s ease;
+            }
+        }
+    }
+
+.add-songs{
+    position: relative;
+    font-size: 3rem;
+    font-weight: 250;
+    color: var(--primary-text);
+     width: 150px;
+        height: 220px;
+        object-fit: cover;
+        border-radius: 10px;
+        z-index: 1;
+        border: 2px dashed var(--accent);
+    transition: all 0.2s ease;
+
+    h2 {
+        position: absolute;
+        bottom: 0;
+        left: 15px;
+    }
+    
+    &:hover {
+        transform: scale(1.1);
+        background-color: var(--accent);
+    }
+}
+.profile-dashboard{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20vh;
+    height: fit-content;
+    width: 100%;
+}
+
+.privacy-settings-modal, .account-settings-modal{
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    gap: 10px;
+    height: 100%;
+    width: 100%;
+}
+.header{
+    width: 100%;
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    border-bottom: solid 1px var(--foreground);
+    font-size: 2.7rem;
+    font-weight: 300;
+    height: 70px;
+    color: var(--primary-text);
+}
+
+.user-dashboard{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+    height: 90dvh;
+    z-index: 100;
+    width: 100%;
+
+    h4{
+        color: var(--primary-text);
+        font-size: 2rem;
+        font-weight: 300;
+    }
+}
+.dashboard-header{
+    display: flex;
+    align-items: center;
+    height: 70px;
+    width: 100%;
+    gap: 20px;
+
+      h4{
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 1.4rem;
+        font-weight: 300;
+        margin: 0;
+        padding: 0;
+
+        &:hover {
+           color: var(--accent);
+            transition: all 0.2s ease;
+        }
+    }
+}
+
+.dashboard-content{
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    height: 100%;
+    width: 100%;
+}
+
+.songs-cards{
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+    gap: 20px;
     height: 100%;
 }
+.upload-container{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    height: fit-content;
+    width: 100%;
+}
+
+@media screen and (min-width: 601px) and (max-width:120vh) {
+    .log_container{
+        width: 93vw !important;
+    }
+    .songs-cards{
+        width: 50%;
+    }
+    .profile-cover,.profile-cover-overlay{
+        height: 300px !important;
+    }
+    .profile-settings-drop{
+        position: absolute !important;
+         top: 70px !important;
+         left: -80% !important;
+         max-width: 90vw !important;
+         height: 50px !important;
+         border: 1px solid var(--border);
+         overflow-x: auto;
+         flex-direction: row;
+         background-color: var(--background) !important;
+         backdrop-filter: brightness(1);
+         border-radius: 10px;
+         padding: 10px;
+    }
+
+    .our-container{
+        align-items: center !important;
+    }
+
+    .musics-container,.image-overlay{
+        width: 120px !important;
+        height: 170px !important;
+
+        img{
+            width: 120px !important;
+            height: 170px !important;
+        }
+    }
+    .add-songs{
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        position: absolute;
+        right: 30px;
+        border: none;
+        cursor: pointer;
+
+        h4{
+            font-size: 1.5rem;
+            font-weight: 300;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+        }
+
+        &:hover{
+            background: none !important;
+            transform: scale(1) !important;
+            color: var(--accent);
+        }
+    }
+    .upload-container{
+       position: relative;
+    }
+    .comment-container,.comment-item{
+        width: 90vw !important;
+    }
+    .our-container,.upload-container{
+        width: 90vw !important;
+    }
+    .songs-cards{
+        width: 90vw !important;
+    }
+    .dashboard-content{
+        flex-direction: column;
+    }
+}
+
+
+@media screen and (max-width: 600px) {
+    .log_container{
+        max-width: 600px !important;
+        padding: 0;
+    }
+    .songs-cards{
+        width: 100%;
+    }
+
+    .our-container{
+        align-items: center !important;
+    }
+
+     .profile-settings-drop{
+         position: absolute !important;
+         top: 50px !important;
+         left: -100% !important;
+         max-width: 350px !important;
+         border: 1px solid var(--border);
+         overflow-x: auto;
+         flex-direction: row;
+         background-color: var(--background) !important;
+         backdrop-filter: brightness(1);
+         border-radius: 10px;
+         padding: 10px;
+    }
+
+    .musics-container,.image-overlay{
+        width: 120px !important;
+        height: 170px !important;
+
+        img{
+            width: 120px !important;
+            height: 170px !important;
+        }
+    }
+    .add-songs{
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        position: absolute;
+        right: 5px;
+        border: none;
+        cursor: pointer;
+
+        h4{
+            font-size: 1.5rem;
+            font-weight: 300;
+            left: 10% !important;
+            transform: translateX(-50%) !important;
+        }
+
+        &:hover{
+            background: none !important;
+            transform: scale(1) !important;
+            color: var(--accent);
+        }
+    }
+    .upload-container{
+       position: relative;
+    }
+    .comment-container,.comment-item{
+        width: 95vw !important;
+    }
+    .our-container,.upload-container{
+        width: 95vw !important;
+    }
+    .songs-cards{
+        width: 95vw !important;
+    }
+    .dashboard-content{
+        flex-direction: column;
+    }
+}
+

@@ -31,6 +31,10 @@ const Player = ({}) => {
   const [userPlaylists, setUserPlaylists] = useState<any[]>([]);
   const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
   const [isAddingToPlaylist, setIsAddingToPlaylist] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
   useEffect(() => {
     if (currentSong?.song_id && currentSong.song_id && currentUser?.user_id && currentUser.user_id !== lastPlayedSong) {
@@ -161,6 +165,64 @@ const Player = ({}) => {
 
   const handlePlaylistMenuClick = () => {
     setShowPlaylistMenu(!showPlaylistMenu);
+  };
+
+  const handleToggleComments = () => {
+    setShowComments(!showComments);
+    if (!showComments && currentSong?.song_id) {
+      fetchSongComments();
+    }
+  };
+
+  const fetchSongComments = async () => {
+    if (!currentSong?.song_id) return;
+
+    try {
+      const response = await fetch(`/api/get-song-comments?song_id=${currentSong.song_id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setComments(data.comments || []);
+      }
+    } catch (error) {
+      console.error('Error fetching song comments:', error);
+    }
+  };
+
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!newComment.trim() || !currentSong?.song_id || !currentUser?.user_id) {
+      return;
+    }
+
+    setIsSubmittingComment(true);
+
+    try {
+      const response = await fetch('/api/add-comment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          song_id: currentSong.song_id,
+          user_id: currentUser.user_id,
+          comment_text: newComment.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setNewComment('');
+        fetchSongComments();
+      } else {
+        console.error('Failed to add comment:', data.error);
+      }
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    } finally {
+      setIsSubmittingComment(false);
+    }
   };
 
   const handlePreviousSong = () => {
@@ -360,6 +422,12 @@ const Player = ({}) => {
                     </svg>
                     {isLiked ? 'Remove from Liked' : 'Like'}
                   </button>
+                  <button className="menu-item" aria-label="comments" onClick={handleToggleComments}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                    </svg>
+                    Comments
+                  </button>
                   
                   <button 
                     className="menu-item"
@@ -454,6 +522,49 @@ const Player = ({}) => {
           </div>
         </div>
       </div>
+
+      {showComments && (
+        <>
+         <div className="comments-overlay"></div>
+        <div className="comments-section">
+          <div className="comments-header">
+            <h3>Comments</h3>
+            <button onClick={handleToggleComments}>×</button>
+          </div>
+          <div className="comments-list">
+            {comments.length === 0 ? (
+              <p>No comments yet</p>
+            ) : (
+              comments.map(comment => (
+                <div key={comment.comment_id} className="comment-item">
+                  <span>
+                  <img src={comment.user_profile || '/user.png'} alt={comment.user_name} />
+                  <strong>{comment.user_name}</strong>
+                  </span>
+                  <div>
+                    <p>{comment.comment_text}</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          {currentUser && (
+            <form onSubmit={handleSubmitComment} className="comment-form">
+              <input
+                type="text"
+                placeholder="Add a comment..."
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                disabled={isSubmittingComment}
+              />
+              <button type="submit" disabled={isSubmittingComment || !newComment.trim()}>
+                {isSubmittingComment ? '...' : 'Send'}
+              </button>
+            </form>
+          )}
+        </div>
+        </>
+      )}
     </div>
 
   )

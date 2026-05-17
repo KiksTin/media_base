@@ -84,7 +84,7 @@ export default function Header({currentUser}: {currentUser: any}) {
               onFocus={() => searchQuery.trim().length >= 2 && setShowResults(true)}
               className="search-input"
             />
-            {isSearching && <div className="search-spinner">⏳</div>}
+            {isSearching && <div className="search-spinner">Searching...</div>}
           </div>
           
           {showResults && (

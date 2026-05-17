@@ -43,7 +43,20 @@
             height: 30px;
             width: 100%;
             color: white;
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
         }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 14px;
+            margin: 0;
+            text-align: center;
+        }
+
         button {
             padding: 5px;
             height: fit-content;
@@ -55,8 +68,13 @@
             transition: all 0.2s ease;
             width: 100%;
 
-            &:hover {
+            &:hover:not(:disabled) {
                 background-color: #333;
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
             }
         }
             

@@ -1,0 +1,38 @@
+.comment-container {
+  height: 80vh;
+  width: 24vw;
+}
+
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comment-item {
+  padding: 10px;
+  display: flex;
+  width: 24vw;
+  align-items: center;
+  gap: 10px;
+  flex-direction: row;
+
+  img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+  }
+  span{
+    display: flex;
+    flex-direction: row;
+  }
+  h3 {
+    color: var(--primary-text);
+    font-weight: 600;
+    margin: 0;
+  }
+  p {
+    margin: 0;
+    font-weight: 300;
+  }
+}

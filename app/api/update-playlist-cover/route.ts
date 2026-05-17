@@ -1,6 +1,8 @@
 import { neon } from '@neondatabase/serverless';
 import { NextRequest, NextResponse } from 'next/server';
-import cloudinary from '@/app/utils/cloudinary';
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
+import { existsSync } from 'fs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,27 +17,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Convert file to buffer
+    // Create uploads directory if it doesn't exist
+    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'playlists');
+    if (!existsSync(uploadsDir)) {
+      await mkdir(uploadsDir, { recursive: true });
+    }
+
+    // Generate unique filename
+    const timestamp = Date.now();
+    const filename = `playlist_cover_${playlist_id}_${timestamp}${file.name.substring(file.name.lastIndexOf('.'))}`;
+    const filepath = join(uploadsDir, filename);
+
+    // Convert file to buffer and save locally
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    await writeFile(filepath, buffer);
 
-    // Upload to Cloudinary
-    const result = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        {
-          folder: 'playlist-covers',
-          resource_type: 'image',
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      ).end(buffer);
-    }) as any;
+    // Create URL path for the image
+    const coverUrl = `/uploads/playlists/${filename}`;
 
-    const coverUrl = result.secure_url;
-
-    // Update database with Cloudinary URL
+    // Update database with local URL
     const sql = neon(process.env.DATABASE_URL!);
     await sql`
       UPDATE mb_playlist

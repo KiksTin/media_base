@@ -12,26 +12,12 @@
     justify-items: center;
     transition: all 0.3s ease;
 
-    &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px var(--shadow);
-    }
-    h2 {
-        position: absolute;
-        bottom: 0;
-        left: 5px;
-        color: var(--primary-text);
-        font-size: 0.9rem;
-        font-weight: 600;
-        text-shadow: 0 1px 2px var(--shadow);
-    }
-    
-    .playlist-cover, .create-playlist-card{
+     .playlist-cover, .create-playlist-card{
         position: absolute;
         top: 5px;
         left: 5px;
-        width: 100%;
-        height: 100%;
+        width: 210px;
+        height: 130px;
         object-fit: cover;
         border-radius: 10px;
         transition: filter 0.4s ease, scale 0.4s ease;
@@ -42,6 +28,67 @@
             scale: 1.05;
         }
     }
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px var(--shadow);
+    }
+    h2 {
+        position: absolute;
+        bottom: 0;
+        left: 14px;
+        color: var(--primary-text);
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-shadow: 0 1px 2px var(--shadow);
+    }
+    .cover-update-btn {
+        position: absolute;
+        top: 1px;
+        right: 7px;
+        background-color: transparent;
+        border: none;
+        color: var(--primary-text);
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 10;
+
+        &:hover {
+            color: var(--accent);
+        }
+    }
+
+    
+    .playlist-menu {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        top: 35px;
+        right: 5px;
+        background-color: var(--songs-n-player-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        z-index: 100;
+        width: fit-content;
+        padding: 10px;
+
+        button {
+            background-color: transparent;
+            border: none;
+            color: var(--primary-text);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &:hover {
+                color: var(--accent);
+            }
+        }
+    }
+
 }
  .create-playlist-card {
         background-color: var(--songs-n-player-bg);

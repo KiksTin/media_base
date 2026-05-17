@@ -1,51 +1,57 @@
 "use client";
 import Link from "next/link";
+import { useState } from "react";
 
 
-const LoginForm = ({response}: {response: any}) => {
+const LoginForm = () => {
+    const [attempt, setAttempt] = useState(3);
+    const [isLoading, setIsLoading] = useState(false);
 
-    var attempt = 3;
+    async function validate(e: React.FormEvent) {
+        e.preventDefault();
+        
+        const username = (document.getElementById("username") as HTMLInputElement).value;
+        const password = (document.getElementById("password") as HTMLInputElement).value;
 
-    function validate(e: React.FormEvent) {
-    e.preventDefault();
-    
-    var username = (document.getElementById("username") as HTMLInputElement).value;
-    var password = (document.getElementById("password") as HTMLInputElement).value;
+        if (!username || !password) {
+            alert("Username and password are required");
+            return;
+        }
 
-    var userFound = false;
+        setIsLoading(true);
 
-    for (var i = 0; i < response.length; i++) {
-        if (username == response[i].user_name && password == response[i].user_password) {
-            userFound = true;
-            break;
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                sessionStorage.setItem('currentUser', JSON.stringify(data.user));
+                console.log('Login successful, redirecting...');
+                window.location.href = "/profile";
+            } else {
+                setAttempt(prev => prev - 1);
+                alert(data.error || `You have left ${attempt - 1} attempt(s)`);
+                
+                if (attempt - 1 === 0) {
+                    (document.getElementById("username") as HTMLInputElement).disabled = true;
+                    (document.getElementById("password") as HTMLInputElement).disabled = true;
+                    (document.getElementById("submit") as HTMLButtonElement).disabled = true;
+                }
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            alert("Login failed. Please try again.");
+        } finally {
+            setIsLoading(false);
         }
     }
-
-    if (userFound) {
-      
-        const loggedInUser = response[i];
-        sessionStorage.setItem('currentUser', JSON.stringify({
-            user_id: loggedInUser.user_id,
-            user_name: loggedInUser.user_name,
-            user_email: loggedInUser.user_email,
-            user_profile: loggedInUser.user_profile,
-            user_cover: loggedInUser.user_cover
-        }));
-        console.log('Login successful, redirecting...');
-        window.location.href = "/profile";
-
-         } else {
-        attempt--;
-        alert("You have left " + attempt + " attempt(s);");
-      
-        if (attempt == 0) {
-            (document.getElementById("username") as HTMLInputElement).disabled = true;
-            (document.getElementById("password") as HTMLInputElement).disabled = true;
-            (document.getElementById("submit") as HTMLButtonElement).disabled = true;
-        }
-        return false;
-    }
-}
 
   return (
     <div className="log-in_form">
@@ -55,12 +61,12 @@ const LoginForm = ({response}: {response: any}) => {
       </video>
 
       <form onSubmit={validate}>
-        <input type="text" placeholder="Username"  id="username"/>
-        <input type="password" placeholder="Password" id="password"/>
-        <button type="submit" id="submit">Log In</button>
+        <input type="text" placeholder="Username"  id="username" disabled={isLoading}/>
+        <input type="password" placeholder="Password" id="password" disabled={isLoading}/>
+        <button type="submit" id="submit" disabled={isLoading}>{isLoading ? 'Logging in...' : 'Log In'}</button>
         <hr/>
         <Link href="/">
-          <button type="button">Continue as Guest</button>
+          <button type="button" disabled={isLoading}>Continue as Guest</button>
         </Link>
       </form>
       

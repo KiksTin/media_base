@@ -36,6 +36,8 @@ const PlaylistContainer = ({currentUser, onPlaylistSelect}: PlaylistContainerPro
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [showCoverUpload, setShowCoverUpload] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [showMenu, setShowMenu] = useState<number | null>(null);
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState<number | null>(null);
 
   const handleCreatePlaylist = () => {
     setShowCreateModal(true);
@@ -50,9 +52,10 @@ const PlaylistContainer = ({currentUser, onPlaylistSelect}: PlaylistContainerPro
     setCoverFile(null);
     setError('');
     setShowCoverUpload(false);
+    setSelectedPlaylistId(null);
   };
 
-  const handleCoverUrlSubmit = async (e: React.FormEvent, playlistId?: number) => {
+  const handleCoverUrlSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!coverFile) {
@@ -60,13 +63,7 @@ const PlaylistContainer = ({currentUser, onPlaylistSelect}: PlaylistContainerPro
       return;
     }
 
-    const userToUse = currentUser || contextUser;
-    if (!userToUse?.user_id) {
-      setError('You must be logged in to update playlist covers');
-      return;
-    }
-
-    if (!playlistId) {
+    if (!selectedPlaylistId) {
       setError('Playlist ID is required');
       return;
     }
@@ -77,7 +74,7 @@ const PlaylistContainer = ({currentUser, onPlaylistSelect}: PlaylistContainerPro
     try {
       const formData = new FormData();
       formData.append('image', coverFile);
-      formData.append('playlist_id', playlistId.toString());
+      formData.append('playlist_id', selectedPlaylistId.toString());
 
       const response = await fetch('/api/update-playlist-cover', {
         method: 'POST',
@@ -89,6 +86,7 @@ const PlaylistContainer = ({currentUser, onPlaylistSelect}: PlaylistContainerPro
       if (response.ok && data.success) {
         setShowCoverUpload(false);
         setCoverFile(null);
+        setSelectedPlaylistId(null);
         await fetchUserPlaylists();
       } else {
         setError(data.error || 'Failed to update cover');
@@ -142,12 +140,9 @@ const PlaylistContainer = ({currentUser, onPlaylistSelect}: PlaylistContainerPro
       const data = await response.json();
 
       if (response.ok && data.success) {
-        // If cover file was provided, update it
-        if (coverFile && data.playlist?.playlist_id) {
-          await handleCoverUrlSubmit(e, data.playlist.playlist_id);
-        }
+   
+     
 
-        // Refresh playlists list
         await fetchUserPlaylists();
         handleCloseModal();
       } else {
@@ -163,23 +158,17 @@ const PlaylistContainer = ({currentUser, onPlaylistSelect}: PlaylistContainerPro
 
   const fetchUserPlaylists = async () => {
     const userToUse = currentUser || contextUser;
-    
-    if (!userToUse?.user_id) {
-      console.log('PlaylistContainer - No user_id found, skipping fetch');
-      setLoading(false);
-      return;
-    }
 
     try {
       const apiUrl = `/api/get-user-playlists?user_id=${userToUse.user_id}`;
       console.log('PlaylistContainer - Fetching from:', apiUrl);
-      
+
       const response = await fetch(apiUrl);
       console.log('PlaylistContainer - Response status:', response.status);
-      
+
       if (response.ok) {
         const userPlaylists: Playlist[] = await response.json();
-        console.log('PlaylistContainer - Playlists received:', userPlaylists[0]);
+        console.log('PlaylistContainer - Playlists received:', userPlaylists);
         setPlaylists(userPlaylists);
       } else {
         console.error('PlaylistContainer - API response not ok:', response.statusText);
@@ -205,9 +194,79 @@ const PlaylistContainer = ({currentUser, onPlaylistSelect}: PlaylistContainerPro
 
   if (playlists.length === 0) {
     return (
+      <div>
       <div className='playlist-card'>
-        <h2>No playlists found</h2>
-        <p>Create your first playlist to get started!</p>
+        <div className='create-playlist-card' onClick={() => handleCreatePlaylist()}>
+          <h2>+</h2>
+        </div>
+      </div>
+
+      {showCreateModal && (
+        <div className="playlist-modal-overlay" onClick={handleCloseModal}>
+          <div className="playlist-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="playlist-modal-header">
+              <h2>Create New Playlist</h2>
+              <button className="modal-close-btn" onClick={handleCloseModal}>×</button>
+            </div>
+            <form onSubmit={handleCreatePlaylistSubmit} className="playlist-modal-form">
+              <div className="form-group">
+                <label htmlFor="playlist-name">Playlist Name</label>
+                <input
+                  type="text"
+                  id="playlist-name"
+                  value={playlistName}
+                  onChange={(e) => setPlaylistName(e.target.value)}
+                  placeholder="Enter playlist name..."
+                  maxLength={50}
+                  disabled={isCreating}
+                  autoFocus
+                />
+                <div className="char-count">
+                  {playlistName.length}/50
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="cover-url">Cover Image (Optional)</label>
+                <input
+                  type="file"
+                  id="cover-url"
+                  accept="image/*"
+                  onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+                  disabled={isCreating}
+                />
+                <div className="form-help">
+                  Upload an image file (jpg, png, gif, webp, svg)
+                </div>
+              </div>
+              
+              {error && (
+                <div className="error-message">
+                  {error}
+                </div>
+              )}
+              
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={handleCloseModal}
+                  disabled={isCreating}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="create-btn"
+                  disabled={isCreating || !playlistName.trim()}
+                >
+                  {isCreating ? 'Creating...' : 'Create'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       </div>
     );
   }
@@ -219,10 +278,43 @@ const PlaylistContainer = ({currentUser, onPlaylistSelect}: PlaylistContainerPro
   };
 
   const handleUpdateCover = (playlistId: number) => {
-    const playlist = playlists.find(p => p.playlist_id === playlistId);
-    if (playlist) {
-      setCoverFile(null);
-      setShowCoverUpload(true);
+    setCoverFile(null);
+    setSelectedPlaylistId(playlistId);
+    setShowCoverUpload(true);
+    setShowMenu(null);
+  };
+
+  const handleDeletePlaylist = async (playlistId: number) => {
+    const userToUse = currentUser || contextUser;
+    if (!userToUse?.user_id) {
+      setError('You must be logged in to delete playlists');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/delete-playlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          playlist_id: playlistId,
+          user_id: userToUse.user_id
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        console.log('Playlist deleted successfully');
+        setShowMenu(null);
+        await fetchUserPlaylists();
+      } else {
+        setError(data.error || 'Failed to delete playlist');
+      }
+    } catch (error) {
+      console.error('Error deleting playlist:', error);
+      setError('Failed to delete playlist. Please try again.');
     }
   };
 
@@ -237,6 +329,13 @@ const PlaylistContainer = ({currentUser, onPlaylistSelect}: PlaylistContainerPro
           >
             <img src={playlist.playlist_cover || '/background.png'} alt="Playlist" className='playlist-cover' />
             <h2>{playlist.playlist_name}</h2>
+            <button type="button" className='cover-update-btn' onClick={(e) => { e.stopPropagation(); setShowMenu(showMenu === playlist.playlist_id ? null : playlist.playlist_id); }}>. . .</button>
+            {showMenu === playlist.playlist_id && (
+              <div className="playlist-menu">
+                <button type="button" onClick={(e) => { e.stopPropagation(); handleUpdateCover(playlist.playlist_id); }}>Update Cover</button>
+                <button type="button" onClick={(e) => { e.stopPropagation(); handleDeletePlaylist(playlist.playlist_id); }}>Delete Playlist</button>
+              </div>
+            )}
           </div>
         ))}
         <div className='playlist-card'>
@@ -306,6 +405,56 @@ const PlaylistContainer = ({currentUser, onPlaylistSelect}: PlaylistContainerPro
                   disabled={isCreating || !playlistName.trim()}
                 >
                   {isCreating ? 'Creating...' : 'Create'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showCoverUpload && (
+        <div className="playlist-modal-overlay" onClick={handleCloseModal}>
+          <div className="playlist-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="playlist-modal-header">
+              <h2>Update Playlist Cover</h2>
+              <button className="modal-close-btn" onClick={handleCloseModal}>×</button>
+            </div>
+            <form onSubmit={handleCoverUrlSubmit} className="playlist-modal-form">
+              <div className="form-group">
+                <label htmlFor="cover-url">Cover Image</label>
+                <input
+                  type="file"
+                  id="cover-url"
+                  accept="image/*"
+                  onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+                  disabled={isUploadingCover}
+                />
+                <div className="form-help">
+                  Upload an image file (jpg, png, gif, webp, svg)
+                </div>
+              </div>
+
+              {error && (
+                <div className="error-message">
+                  {error}
+                </div>
+              )}
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={handleCloseModal}
+                  disabled={isUploadingCover}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="create-btn"
+                  disabled={isUploadingCover || !coverFile}
+                >
+                  {isUploadingCover ? 'Uploading...' : 'Update'}
                 </button>
               </div>
             </form>
