@@ -38,6 +38,7 @@ const SignUpForm = () => {
 
       if (response.ok && data.success) {
         router.push('/log-in');
+        window.location.href = "/profile";
       } else {
         setError(data.error || 'Sign up failed');
       }

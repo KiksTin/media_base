@@ -529,7 +529,7 @@ const Player = ({}) => {
         <div className="comments-section">
           <div className="comments-header">
             <h3>Comments</h3>
-            <button onClick={handleToggleComments}>×</button>
+            <button onClick={handleToggleComments} className="close"><h2>×</h2></button>
           </div>
           <div className="comments-list">
             {comments.length === 0 ? (

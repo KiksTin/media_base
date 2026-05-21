@@ -312,8 +312,8 @@
 
 @media (max-width: 600px) {
     .playlist-card{
-        top: 30px;
-        height: 80px;
-        width: 110px;
+        top: 0 !important;
+        height: 130px !important;
+        width: 210px !important;
     }
 }

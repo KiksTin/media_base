@@ -408,7 +408,7 @@
             transition: background-color 0.2s;
 
             &:hover {
-                background-color: var(--accent);
+                color: var(--accent);
             }
         }
     }
@@ -540,6 +540,15 @@
         transform: translateY(0);
     }
 }
+@media screen and (min-width: 601px) and (max-width:120vh) {
+      .comment-item{
+        margin-left: 0;
+        justify-content: left;
+        div{
+            margin-left: -100%;
+        }
+    }
+}
 
 @media (max-width: 600px) {   
    .player{
@@ -661,10 +670,32 @@
         }
         .dropdown-menu{
             width: 180px;
-            left: 22%;
+            left: 14vw;
             transform: translateX(-80%);
         }
 
         
+    }
+
+    .comments-section{
+        position: fixed;
+        top: -300%;
+        width: 90vw;
+    }
+    .comments-overlay{
+        position: fixed;
+        top: -700%;
+        width: 110vw;
+        margin: 0;
+        height: 100vh;
+    }
+    .comment-item{
+        span{
+            margin-left: 50px;
+        }
+    }
+    .submenu{
+       max-width: 90px !important;
+       min-width: fit-content !important;
     }
 }

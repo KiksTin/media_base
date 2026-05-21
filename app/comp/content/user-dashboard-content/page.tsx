@@ -1005,7 +1005,7 @@ export default function UserLog({ currentUser }: { currentUser: any }) {
                                 ))}
                             </div>
                         </div>
-                        <div className="form-group">
+                        <div className="form-group2">
                             <label htmlFor="rating-comment">Additional comments (optional)</label>
                             <textarea
                                 id="rating-comment"

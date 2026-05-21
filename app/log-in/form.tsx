@@ -34,7 +34,12 @@ const LoginForm = () => {
             if (response.ok && data.success) {
                 sessionStorage.setItem('currentUser', JSON.stringify(data.user));
                 console.log('Login successful, redirecting...');
-                window.location.href = "/profile";
+
+                if (username === 'admin') {
+                    window.location.href = "/admin";
+                } else {
+                    window.location.href = "/profile";
+                }
             } else {
                 setAttempt(prev => prev - 1);
                 alert(data.error || `You have left ${attempt - 1} attempt(s)`);
