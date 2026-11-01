@@ -1,6 +1,12 @@
 
 ## Media Base
 
-CC106 - Web Development Project
+Final Project for the following courses:
+    CC106
+    IAS 101
 
-ongoing
+Submitted on MAY 2026
+
+Status: Ongoing
+
+Currently working on the data load issue.
