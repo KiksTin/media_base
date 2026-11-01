@@ -5,17 +5,40 @@ import Link from 'next/link';
 import './page.css';
 
 export default function AdminDashboard() {
-    const { currentUser } = useClientContext();
     const [activeTab, setActiveTab] = useState('users');
     const [users, setUsers] = useState<any[]>([]);
     const [songs, setSongs] = useState<any[]>([]);
     const [playlists, setPlaylists] = useState<any[]>([]);
     const [comments, setComments] = useState<any[]>([]);
+    const [loginLogs, setLoginLogs] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [showAddUserForm, setShowAddUserForm] = useState(false);
+    const [newUser, setNewUser] = useState({ user_name: '', user_password: '', user_email: '' });
+    const { logout } = useClientContext();
+    const [showAdminLogIn, setShowAdminLogIn] = useState(false);
+    const [adminCredentials, setAdminCredentials] = useState({ username: '', password: '' });
+    const [attempt, setAttempt] = useState(3);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
 
-    // Check if user is admin (for demo, we'll check if username is 'admin')
-    const isAdmin = currentUser?.user_name === 'admin';
+    useEffect(() => {
+        const isAdminLoggedIn = sessionStorage.getItem('isAdmin');
+        if (isAdminLoggedIn === 'true') {
+            setIsAdmin(true);
+        }
+    }, []);
+
+    const handleAdminLogIn = () => {
+        setShowAdminLogIn(true);
+    };
+
+    const handleAdminInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setAdminCredentials({
+            ...adminCredentials,
+            [e.target.id]: e.target.value
+        });
+    };
 
     useEffect(() => {
         if (!isAdmin) {
@@ -44,6 +67,9 @@ export default function AdminDashboard() {
                 case 'comments':
                     endpoint = '/api/admin/get-all-comments';
                     break;
+                case 'logs':
+                    endpoint = '/api/admin/get-login-logs';
+                    break;
             }
 
             const response = await fetch(endpoint);
@@ -62,6 +88,9 @@ export default function AdminDashboard() {
                         break;
                     case 'comments':
                         setComments(data.comments);
+                        break;
+                    case 'logs':
+                        setLoginLogs(data.logs);
                         break;
                 }
             } else {
@@ -118,12 +147,127 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleAddUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!newUser.user_name || !newUser.user_password) {
+            alert('Username and password are required');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/admin/add-user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newUser),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                alert('User added successfully');
+                setNewUser({ user_name: '', user_password: '', user_email: '' });
+                setShowAddUserForm(false);
+                fetchData();
+            } else {
+                alert(data.error || 'Failed to add user');
+            }
+        } catch (error) {
+            console.error('Error adding user:', error);
+            alert('Failed to add user. Please try again.');
+        }
+    };
+   
+    //ADMIN VALIDATE
+     async function validate(e: React.FormEvent) {
+        e.preventDefault();
+
+        const { username, password } = adminCredentials;
+
+        if (!username || !password) {
+            alert("Username and password are required");
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            const response = await fetch('/api/admin-log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ admin_name: username, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                sessionStorage.setItem('currentUser', JSON.stringify(data.user));
+                sessionStorage.setItem('isAdmin', 'true');
+                console.log('Login successful, redirecting...');
+                setIsAdmin(true);
+            } else {
+                setAttempt(prev => prev - 1);
+                alert(data.error || `You have left ${attempt - 1} attempt(s)`);
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            alert("Login failed. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+
     if (!isAdmin) {
+        //ADMIN LOGIN
+        if (showAdminLogIn) {
+            return (
+                <div className="admin-login">
+                    <div className="admin-login-container">
+                        <h2>Admin Login</h2>
+                        <form onSubmit={validate}>
+                            <input
+                                type="text"
+                                placeholder="Admin name"
+                                id="username"
+                                value={adminCredentials.username}
+                                onChange={handleAdminInputChange}
+                                disabled={isLoading || attempt === 0}
+                            />
+                            <input
+                                type="password"
+                                placeholder="Password"
+                                id="password"
+                                value={adminCredentials.password}
+                                onChange={handleAdminInputChange}
+                                disabled={isLoading || attempt === 0}
+                            />
+                            <button
+                                type="submit"
+                                id="submit"
+                                disabled={isLoading || attempt === 0}
+                            >
+                                {isLoading ? 'Logging in...' : 'Log In'}
+                            </button>
+                            <hr/>
+                            <Link href="/">
+                                <button type="button" disabled={isLoading}>Go back as User</button>
+                            </Link>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
         return (
             <div className="admin-dashboard">
                 <div className="admin-error">
                     <h2>Access Denied</h2>
                     <p>{error || 'You do not have permission to access this page.'}</p>
+                    <button type="button" onClick={handleAdminLogIn} className="enter-admin-btn">Enter As Admin</button>
                     <Link href="/">Go to Home</Link>
                 </div>
             </div>
@@ -133,10 +277,13 @@ export default function AdminDashboard() {
     return (
         <div className="admin-dashboard">
             <div className="admin-header">
+                <span>
+                <img className="admin-logo" src="/logo.png" alt="Logo" />
                 <h1>Admin Dashboard</h1>
-                <Link href="/" className="back-link">Back to Home</Link>
+                </span>
+                <button onClick={() => logout()} className="logout-btn">Logout</button>
             </div>
-
+        <div className="admin-content-wrapper">
             <div className="admin-tabs">
                 <button
                     className={activeTab === 'users' ? 'active' : ''}
@@ -162,6 +309,12 @@ export default function AdminDashboard() {
                 >
                     Comments
                 </button>
+                <button
+                    className={activeTab === 'logs' ? 'active' : ''}
+                    onClick={() => setActiveTab('logs')}
+                >
+                    Login Logs
+                </button>
             </div>
 
             <div className="admin-content">
@@ -170,7 +323,40 @@ export default function AdminDashboard() {
 
                 {activeTab === 'users' && (
                     <div className="admin-table">
-                        <h2>All Users</h2>
+                        <div className="admin-table-header">
+                            <h1>All Users</h1>
+                            <h2 onClick={() => setShowAddUserForm(true)} className="add-btn">Add User</h2>
+                        </div>
+                        <div className='admin-table-content'>
+                        {showAddUserForm && (
+                            <div className="add-user-form">
+                                <h3>Add New User</h3>
+                                <form onSubmit={handleAddUser}>
+                                    <input
+                                        type="text"
+                                        placeholder="Username"
+                                        value={newUser.user_name}
+                                        onChange={(e) => setNewUser({...newUser, user_name: e.target.value})}
+                                        required
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="Password"
+                                        value={newUser.user_password}
+                                        onChange={(e) => setNewUser({...newUser, user_password: e.target.value})}
+                                        required
+                                    />
+                                    <input
+                                        type="email"
+                                        placeholder="Email (optional)"
+                                        value={newUser.user_email}
+                                        onChange={(e) => setNewUser({...newUser, user_email: e.target.value})}
+                                    />
+                                    <button type="submit">Add User</button>
+                                    <button type="button" onClick={() => setShowAddUserForm(false)}>Cancel</button>
+                                </form>
+                            </div>
+                        )}
                         <table>
                             <thead>
                                 <tr>
@@ -198,12 +384,13 @@ export default function AdminDashboard() {
                                 ))}
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 )}
 
                 {activeTab === 'songs' && (
                     <div className="admin-table">
-                        <h2>All Songs</h2>
+                        <h1>All Songs</h1>
                         <table>
                             <thead>
                                 <tr>
@@ -236,7 +423,7 @@ export default function AdminDashboard() {
 
                 {activeTab === 'playlists' && (
                     <div className="admin-table">
-                        <h2>All Playlists</h2>
+                        <h1>All Playlists</h1>
                         <table>
                             <thead>
                                 <tr>
@@ -301,6 +488,38 @@ export default function AdminDashboard() {
                         </table>
                     </div>
                 )}
+
+                {activeTab === 'logs' && (
+                    <div className="admin-table">
+                        <h1>Login Attempts</h1>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Time</th>
+                                    <th>Date</th>
+                                    <th>Success</th>
+                                    <th>IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {loginLogs.map(log => (
+                                    <tr key={log.log_id}>
+                                        <td>{log.log_id}</td>
+                                        <td>{log.user_name}</td>
+                                        <td>{log.attempt_time}</td>
+                                        <td>{log.attempt_date}</td>
+                                        <td>{log.success ? <p className="success">Successfully Logged In</p> : <p className="failure">Failed to Login</p>}</td>
+                                        <td>{log.ip_address}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+                
+            </div>
             </div>
         </div>
     );

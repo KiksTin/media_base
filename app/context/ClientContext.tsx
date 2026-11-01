@@ -52,6 +52,7 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setIsLogedIn(false);
     location.reload();
     sessionStorage.removeItem('currentUser');
+    sessionStorage.removeItem('isAdmin');
   };
 
   return (

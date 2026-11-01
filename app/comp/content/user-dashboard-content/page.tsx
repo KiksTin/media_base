@@ -54,7 +54,7 @@ export default function UserLog({ currentUser }: { currentUser: any }) {
     const [deletePassword, setDeletePassword] = useState('');
     const [deleteConfirm, setDeleteConfirm] = useState(false);
 
-
+    //MODEL FUNCTIONS
 
     const handleCloseModal = () => {
         setShowSongModal(false);
@@ -71,7 +71,8 @@ export default function UserLog({ currentUser }: { currentUser: any }) {
         setShowChangeCover(false);
         setShowDeleteAccount(false);
     };
-     const handleSongModal = () => {
+    
+    const handleSongModal = () => {
         setShowSongModal(true);
         setSongName('');
         setSongArtist('');

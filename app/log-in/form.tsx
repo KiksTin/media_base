@@ -6,27 +6,35 @@ import { useState } from "react";
 const LoginForm = () => {
     const [attempt, setAttempt] = useState(3);
     const [isLoading, setIsLoading] = useState(false);
+    const [securityQuestion, setSecurityQuestion] = useState('');
+    const [answer, setAnswer] = useState('');
 
     async function validate(e: React.FormEvent) {
         e.preventDefault();
-        
+
         const username = (document.getElementById("username") as HTMLInputElement).value;
         const password = (document.getElementById("password") as HTMLInputElement).value;
+        const answerValue = (document.getElementById("answer") as HTMLInputElement)?.value || '';
 
         if (!username || !password) {
             alert("Username and password are required");
             return;
         }
 
+        if (!answerValue) {
+            alert("Security answer is required");
+            return;
+        }
+
         setIsLoading(true);
 
-        try {
+       //Login API for primary Auth
             const response = await fetch('/api/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ username, password, answer: answerValue }),
             });
 
             const data = await response.json();
@@ -50,12 +58,37 @@ const LoginForm = () => {
                     (document.getElementById("submit") as HTMLButtonElement).disabled = true;
                 }
             }
-        } catch (error) {
-            console.error('Login error:', error);
-            alert("Login failed. Please try again.");
-        } finally {
-            setIsLoading(false);
+    }
+
+    async function fetchSecurityQuestion(username: string) {
+        if (!username) {
+            setSecurityQuestion('');
+            return;
         }
+
+        //Get security API to Fetch data for Secondary Auth
+        
+            const response = await fetch('/api/get-security-question', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setSecurityQuestion(data.question || '');
+            } else {
+                setSecurityQuestion('');
+            }
+      
+    }
+
+    function handleUsernameChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const username = e.target.value;
+        fetchSecurityQuestion(username);
     }
 
   return (
@@ -66,8 +99,14 @@ const LoginForm = () => {
       </video>
 
       <form onSubmit={validate}>
-        <input type="text" placeholder="Username"  id="username" disabled={isLoading}/>
+        <input type="text" placeholder="Username"  id="username" disabled={isLoading} onChange={handleUsernameChange}/>
         <input type="password" placeholder="Password" id="password" disabled={isLoading}/>
+        {securityQuestion && (
+            <>
+                <p className="security-question">{securityQuestion}</p>
+                <input type="text" placeholder="Security Answer" id="answer" disabled={isLoading} value={answer} onChange={(e) => setAnswer(e.target.value)}/>
+            </>
+        )}
         <button type="submit" id="submit" disabled={isLoading}>{isLoading ? 'Logging in...' : 'Log In'}</button>
         <hr/>
         <Link href="/">

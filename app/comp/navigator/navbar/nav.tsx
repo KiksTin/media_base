@@ -8,7 +8,6 @@ export default function Nav() {
   const pathname = usePathname()
   const { currentUser } = useClientContext()
   
-  // Check if user is admin (for demo, we'll check if username is 'admin')
   const isAdmin = currentUser?.user_name === 'admin'
   
   return (
